@@ -1,0 +1,12 @@
+import "Navigator.idsl";
+
+Component localnavigationComp
+{
+	Communications
+	{
+		requires LocalNavigatorReportState;
+		implements LocalNavigator;
+	};
+	language Cpp;
+};
+
