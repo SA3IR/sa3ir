@@ -1,0 +1,11 @@
+import "AGMWorldModel.idsl";
+Component behaviorTree
+{
+	Communications
+	{
+		
+	};
+	language Cpp;
+	options agmagent;
+};
+

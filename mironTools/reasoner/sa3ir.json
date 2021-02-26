@@ -1,0 +1,234 @@
+{
+	"period" : {
+		"value" : 5,
+		"unit" : "seconds"
+	},
+	"properties" : [
+		{
+			"name" : "safety",
+			"reference" : 1
+		},
+		{
+			"name" : "mission_completion",
+			"reference" : 0.5
+		},
+		{
+			"name" : "power_autonomy",
+			"reference" : 1
+		}
+	],
+	"observations" : [
+		{
+			"name" : "o1_ms",
+			"influence" : "reinforces",
+			"strength" : "medium",
+			"property" : "mission_completion",
+			"survival" : {
+				"value" : 10000,
+				"unit" : "seconds"
+			}
+		},
+		{
+			"name" : "o2_ms",
+			"influence" : "reinforces",
+			"strength" : "low",
+			"property" : "mission_completion",
+			"survival" : {
+				"value" : 10000,
+				"unit" : "seconds"
+			}
+		},
+		{
+			"name" : "o3_ms",
+			"influence" : "undermines",
+			"strength" : "high",
+			"property" : "mission_completion",
+			"survival" : {
+				"value" : 10000,
+				"unit" : "seconds"
+			}
+		},	
+		{
+			"name" : "o4_ms",
+			"influence" : "undermines",
+			"strength" : "very_high",
+			"property" : "mission_completion",
+			"survival" : {
+				"value" : 10000,
+				"unit" : "seconds"
+			}
+		},
+		{
+			"name" : "o5_ms",
+			"influence" : "undermines",
+			"strength" : "low",
+			"property" : "mission_completion",
+			"survival" : {
+				"value" : 10000,
+				"unit" : "seconds"
+			}
+		},		
+		{
+			"name" : "o6_ms",
+			"influence" : "undermines",
+			"strength" : "low",
+			"property" : "mission_completion",
+			"survival" : {
+				"value" : 10000,
+				"unit" : "seconds"
+			}
+		},
+		{
+			"name" : "o1_s",
+			"influence" : "reinforces",
+			"strength" : "very_high",
+			"property" : "safety",
+			"survival" : {
+				"value" : 10000,
+				"unit" : "seconds"
+			}
+		},	
+		{
+			"name" : "o2_s",
+			"influence" : "reinforces",
+			"strength" : "medium",
+			"property" : "safety",
+			"survival" : {
+				"value" : 10000,
+				"unit" : "seconds"
+			}
+		},		
+		
+		{
+			"name" : "o3_s",
+			"influence" : "reinforces",
+			"strength" : "low",
+			"property" : "safety",
+			"survival" : {
+				"value" : 10000,
+				"unit" : "seconds"
+			}
+		},
+		{
+			"name" : "o4_s",
+			"influence" : "reinforces",
+			"strength" : "medium",
+			"property" : "safety",
+			"survival" : {
+				"value" : 10000,
+				"unit" : "seconds"
+			}
+		},
+		{
+			"name" : "o5_s",
+			"influence" : "reinforces",
+			"strength" : "low",
+			"property" : "safety",
+			"survival" : {
+				"value" : 10000,
+				"unit" : "seconds"
+			}
+		},
+		{
+			"name" : "o6_s",
+			"influence" : "undermines",
+			"strength" : "low",
+			"property" : "safety",
+			"survival" : {
+				"value" : 10000,
+				"unit" : "seconds"
+			}
+		},
+
+		{
+			"name" : "o7_s",
+			"influence" : "undermines",
+			"strength" : "medium",
+			"property" : "safety",
+			"survival" : {
+				"value" : 10000,
+				"unit" : "seconds"
+			}
+		},
+		{
+			"name" : "o8_s",
+			"influence" : "undermines",
+			"strength" : "medium",
+			"property" : "safety",
+			"survival" : {
+				"value" : 10000,
+				"unit" : "seconds"
+			}
+		},
+		{
+			"name" : "o9_s",
+			"influence" : "undermines",
+			"strength" : "high",
+			"property" : "safety",
+			"survival" : {
+				"value" : 10000,
+				"unit" : "seconds"
+			}
+		},
+		{
+			"name" : "o10_s",
+			"influence" : "undermines",
+			"strength" : "very_high",
+			"property" : "safety",
+			"survival" : {
+				"value" : 10000,
+				"unit" : "seconds"
+			}
+		},
+		{
+			"name" : "o1_pa",
+			"influence" : "reinforces",
+			"strength" : "medium",
+			"property" : "power_autonomy",
+			"survival" : {
+				"value" : 10000,
+				"unit" : "seconds"
+			}
+		},
+		{
+			"name" : "o2_pa",
+			"influence" : "undermines",
+			"strength" : "low",
+			"property" : "power_autonomy",
+			"survival" : {
+				"value" : 10000,
+				"unit" : "seconds"
+			}
+		},
+		{
+			"name" : "o3_pa",
+			"influence" : "undermines",
+			"strength" : "medium",
+			"property" : "power_autonomy",
+			"survival" : {
+				"value" : 10000,
+				"unit" : "seconds"
+			}
+		},
+		{
+			"name" : "o4_pa",
+			"influence" : "undermines",
+			"strength" : "high",
+			"property" : "power_autonomy",
+			"survival" : {
+				"value" : 10000,
+				"unit" : "seconds"
+			}
+		},
+		{
+			"name" : "o5_pa",
+			"influence" : "undermines",
+			"strength" : "very_high",
+			"property" : "power_autonomy",
+			"survival" : {
+				"value" : 10000,
+				"unit" : "seconds"
+			}
+		}
+	]
+}

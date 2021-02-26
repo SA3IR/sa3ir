@@ -1,0 +1,10 @@
+import "AGMWorldModel.idsl";
+Component webInterfaceAgent
+{
+	Communications
+	{
+	};
+	language Cpp;
+	options agmagent;
+};
+

@@ -1,0 +1,17 @@
+start_a -0.12 -1.0 3.14
+start_b -0.12 -1.0 3.14
+pick1_a 0.2 0.0 1.52 
+pick1_b 1.13 0.86 2.11
+deliverArea1 0.2 0.0 1.52 
+pick2_a 2.6 0.0 1.52
+pick2_b 3.57 2.52 4.0
+deliverArea2 2.6 0.0 1.52
+pick3_a 5.32 0.08 1.54
+pick3_b 6.78 1.30 3.14
+deliverArea3 5.32 0.08 1.54
+pick4_a 5.0 -1.3 3.14
+pick4_b 2.41 -1.2 6.17
+deliverArea4 5.0 -1.3 3.14
+dock -0.24 0.78 3.14
+defaultDeliverArea -0.12 -1.0 3.14
+

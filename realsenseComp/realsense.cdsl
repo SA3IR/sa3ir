@@ -1,0 +1,12 @@
+import "AprilBasedLocalization.idsl";
+import "PersonSa3ir.idsl";
+
+Component realsense
+{
+	Communications
+	{
+            requires PersonToAgent, AprilBasedLocalization;
+	};
+	language Cpp;
+};
+

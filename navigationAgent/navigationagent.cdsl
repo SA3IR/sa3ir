@@ -1,0 +1,13 @@
+import "Navigator.idsl";
+
+Component navigationagent
+{
+	Communications
+	{
+		requires LocalNavigator;
+		implements LocalNavigatorReportState;
+	};
+	language Cpp;
+	options agmagent;
+};
+

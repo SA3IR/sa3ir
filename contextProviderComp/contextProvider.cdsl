@@ -1,0 +1,12 @@
+import "AGMWorldModel.idsl";
+
+Component contextProvider
+{
+	Communications
+	{
+
+	};
+	language Cpp;
+	options agmagent;
+};
+

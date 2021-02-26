@@ -1,0 +1,70 @@
+include_directories($ENV{BEHAVIOR_TREE_PATH}/include)
+include_directories( ./executor/include )
+
+
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+# Sources set
+SET ( SOURCES
+  specificworker.cpp
+  specificmonitor.cpp
+  executor/src/deliver_object.cpp
+  executor/src/detect_object.cpp
+  executor/src/pick_object.cpp
+  executor/src/get_position.cpp
+  executor/src/skill_action.cpp
+  executor/src/skill_parser.cpp
+  executor/src/variant_action.cpp
+  executor/src/move_roboter_position.cpp
+  executor/src/move_roboter_position2.cpp
+  executor/src/approachObject.cpp
+  executor/src/dock.cpp
+  executor/src/validEstimatedPosition.cpp 
+  executor/src/pickingRequests.cpp
+  executor/src/doNothing.cpp
+  executor/src/moveToDeliverArea.cpp
+  executor/src/moveToDefaultDeliverArea.cpp
+  executor/src/doNothing.cpp
+  executor/src/moveToStart.cpp
+)
+
+# Headers set
+SET ( HEADERS
+  specificworker.h
+  specificmonitor.h
+  executor/include/deliver_object.hpp
+  executor/include/detect_object.hpp
+  executor/include/pick_object.hpp
+  executor/include/get_position.hpp
+  executor/include/skill_action.hpp
+  executor/include/skill_parser.hpp
+  executor/include/variant_action.hpp
+  executor/include/move_roboter_position.hpp
+  executor/src/move_roboter_position2.cpp
+  executor/include/approachObject.hpp
+  executor/include/dock.hpp
+  executor/include/validEstimatedPosition.hpp 
+  executor/include/pickingRequests.hpp
+  executor/include/doNothing.hpp
+  executor/include/moveToDeliverArea.hpp
+  executor/include/moveToDefaultDeliverArea.hpp
+  executor/include/moveToStart.hpp
+)
+
+INCLUDE($ENV{ROBOCOMP}/cmake/modules/ipp.cmake)
+INCLUDE($ENV{ROBOCOMP}/cmake/modules/FindZMQ.cmake)
+
+link_directories( $ENV{BEHAVIOR_TREE_PATH}/build/lib )
+
+add_definitions(-DSINGLE_TROLLEY)
+#find_package(ZMQ REQUIRED)
+
+SET ( SPECIFIC_LIBS 
+  behaviortree_cpp_v3 
+  dl 
+  pthread 
+  zmq
+)
+
+ADD_DEFINITIONS( -std=c++11 )
+

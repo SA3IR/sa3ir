@@ -1,0 +1,46 @@
+roqme RoqmeSa3ir
+
+context RobotBump : boolean // cognidrive
+context PeopleInRoom : enum {FULL, HALF, EMPTY} // personAgent? 
+context BatteryLevel : enum { HIGH, HALF, LOW, VERYLOW} // cognidrive
+context BatteryCharging : boolean //cognidrive
+context ObjectIdentified : boolean //objectRecognitionAgent 
+context ObjectPickedUp : boolean //pickUpAgent
+context ObjectDelivered : boolean // deliverAgent
+//context DistanceToGoal : number //cognidrive
+context TrolleyFull : boolean
+context GoalReached : boolean // cognidrive
+
+property safety reference 1
+property mission_completion reference 0.5
+property power_autonomy reference 1
+
+// Mission completion
+observation o1_ms : ObjectIdentified or ObjectPickedUp or ObjectDelivered or GoalReached reinforces mission_completion
+observation o2_ms : BatteryLevel::HIGH or BatteryLevel::HALF or BatteryLevel::LOW reinforces mission_completion low
+observation o3_ms : !GoalReached or !ObjectIdentified or !ObjectPickedUp or !ObjectDelivered undermines mission_completion high
+observation o4_ms : BatteryCharging undermines mission_completion veryhigh
+observation o5_ms : BatteryLevel::VERYLOW undermines mission_completion low
+observation o6_ms : RobotBump  undermines mission_completion low
+
+//Safety
+observation o1_s : (TrolleyFull -> !TrolleyFull) reinforces safety veryhigh
+observation o2_s : 	ObjectDelivered reinforces safety
+observation o3_s : 	ObjectIdentified reinforces safety verylow
+observation o4_s : 	(PeopleInRoom::HALF -> PeopleInRoom::EMPTY) reinforces safety low
+observation o5_s :  (PeopleInRoom::FULL -> PeopleInRoom::HALF) reinforces safety	
+observation o6_s :	(RobotBump -> !RobotBump) reinforces safety low
+observation o7_s : 	(PeopleInRoom::HALF range(1,1)) or (PeopleInRoom::EMPTY -> PeopleInRoom::HALF) undermines safety low
+observation o8_s : 	(PeopleInRoom::FULL range(1,1)) or (PeopleInRoom::HALF -> PeopleInRoom::FULL) undermines safety
+observation o9_s :	ObjectPickedUp undermines safety 
+observation o10_s :  RobotBump undermines safety high
+observation o11_s :  TrolleyFull undermines safety veryhigh
+	
+//Power autonomy				
+observation o1_pa : eventWhen(BatteryCharging) and ( eventWhen (BatteryLevel::LOW) or eventWhen(BatteryLevel::HALF) or eventWhen(BatteryLevel::HIGH) ) reinforces power_autonomy
+observation o2_pa :	(BatteryLevel::HALF range(1,1)) or (BatteryLevel::HIGH -> BatteryLevel::HALF) undermines power_autonomy low
+observation o3_pa :	(BatteryLevel::LOW range(1,1)) or (BatteryLevel::HALF -> BatteryLevel::LOW) undermines power_autonomy
+observation o4_pa :	(BatteryLevel::VERYLOW range(1,1)) or (BatteryLevel::LOW -> BatteryLevel::VERYLOW) undermines power_autonomy high
+
+
+

@@ -1,0 +1,10 @@
+import "AGMWorldModel.idsl";
+Component deliver
+{
+	Communications
+	{
+	};
+	language Cpp;
+	options agmagent;
+};
+

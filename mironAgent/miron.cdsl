@@ -1,0 +1,10 @@
+import "AGMWorldModel.idsl";
+Component miron
+{
+	Communications
+	{
+	};
+	language Cpp;
+	options agmagent;
+};
+

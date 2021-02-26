@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en" ng-app="angularSa3ir">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SA3IR</title>
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
+</head>
+<body ng-controller="mainController">
+    <div class="container"> 
+        <div class="jumbotron text-center">
+            <h1>Picking place two</h1>
+        </div>
+	<div id="todo-form" class="row">
+            <div class="col-sm-8 col-sm-offset-2 text-center">
+                <form>
+                   <button class="btn btn-primary btn-lg" ng-click="callTrolley(20)">Request trolley</button>
+                   <button class="btn btn-primary btn-lg" ng-click="callTrolley(21)">Deliver trolley</button>
+                   <button class="btn btn-primary btn-lg" ng-click="callTrolley(22)">Deliver trolley (full)</button>	
+                </form>
+		<p></p>
+		<label id = "status_picker2"> 
+		</label> 
+            </div>
+        </div>
+    </div>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script> <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.min.js"></script> <script src="main.js"></script>
+</body>
+</html>

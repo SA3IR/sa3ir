@@ -1,0 +1,98 @@
+<AGMModel>
+	<symbol id="0" type="world" x="0" y="0">
+		<attribute key="imType" value="transform" />
+		<attribute key="imName" value="world" />
+	</symbol>
+
+	<symbol id="1" type="location" x="-150" y="575">
+		<attribute key="imType" value="transform" />
+		<attribute key="imName" value="consulta1" />
+	</symbol>
+	
+	<symbol id="2" type="room1" x="-330" y="800">
+	</symbol>
+
+	<symbol id="3" type="robot" x="330" y="375">
+		<attribute key="imType" value="transform" />
+		<attribute key="imName" value="world" />
+		<attribute key="volume" value="0.8" />
+        <attribute key="lastAction" value="" />
+	</symbol>
+
+
+	<symbol id="4" type="battery" x="600" y="250">
+		<attribute key="level" value="high" />
+	</symbol>
+	
+
+	<symbol id="5" type="navigation" x="-330" y="800">
+		<attribute key="x" value="0" />
+		<attribute key="z" value="0" />
+		<attribute key="angle" value="0" />
+		<attribute key="goal" value="pick1" />
+		<attribute key="docking" value="false"/>
+		<attribute key="result" value="" />
+	</symbol>
+
+	<symbol id="6" type="detecting" x="-330" y="800">
+		<attribute key="result" value="" />
+	</symbol>
+	
+
+	<symbol id="7" type="pickingUp" x="-330" y="800">
+		<attribute key="result" value="" />
+	</symbol>
+
+
+	<symbol id="8" type="delivering" x="-330" y="800">
+		<attribute key="result" value="" />
+	</symbol>
+
+	<symbol id="9" type="position" x="-330" y="900">
+		<attribute key="x" value="0" />
+		<attribute key="y" value="0" />
+		<attribute key="z" value="0" />
+		<attribute key="angle" value="0" />
+	</symbol>
+
+
+	<symbol id="10" type="object" x="-830" y="800">
+	</symbol>
+
+
+	<symbol id="11" type="position" x="-330" y="900">
+		<attribute key="x" value="0" />
+		<attribute key="z" value="0" />
+		<attribute key="angle" value="0" />
+	</symbol>
+
+	<symbol id="12" type="people" x="-430" y="600">
+		<attribute key="number" value="0" />
+	</symbol>
+    
+   <!-- <symbol id="13" type="tag" x="-530" y="600">
+		<attribute key="id" value="" />
+        <attribute key="x" value="0" />
+        <attribute key="z" value="0" />
+        <attribute key="angle" value="0" />
+	</symbol>-->
+    
+
+
+	<link src="1" dst="0" label="in" />
+	<link src="2" dst="1" label="in" />
+	<link src="3" dst="1" label="in" />
+	<link src="3" dst="4" label="not" />
+	<link src="3" dst="5" label="stopped" />
+	<link src="3" dst="6" label="not" />
+	<link src="3" dst="7" label="not" />
+	<link src="3" dst="8" label="not" />
+	<link src="3" dst="9" label="in" />
+	<link src="10" dst="11" label="in" />
+	<link src="3" dst="12" label="detected" />
+<!--    <link src="3" dst="13" label="not_detected" />-->
+
+</AGMModel>
+
+
+

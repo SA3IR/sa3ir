@@ -1,0 +1,13 @@
+import "AGMWorldModel.idsl";
+import "PersonSa3ir.idsl";
+
+Component personAgent
+{
+	Communications
+	{
+		requires PersonToAgent;
+	};
+	language Cpp;
+	options agmagent;
+};
+

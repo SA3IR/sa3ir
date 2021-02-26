@@ -1,0 +1,19 @@
+
+# Sources set
+SET ( SOURCES
+  specificworker.cpp
+  specificmonitor.cpp
+)
+
+# Headers set
+SET ( HEADERS
+  specificworker.h
+  specificmonitor.h
+)
+
+SET ( SPECIFIC_LIBS 
+  zmq
+)
+
+set(CMAKE_CXX_STANDARD 11)
+
