@@ -4,7 +4,7 @@
 
 1. Installe the BehaviorTree.CPP library from https://gitlab.com/aromerogarces/behaviortree.git
 
-2. Install RealSense and OpenVino using the installer script available in https://gitlab.com/aromerogarces/installers-sa3ir
+2. Install RealSense (https://github.com/IntelRealSense/librealsense/blob/master/doc/distribution_linux.md) and OpenVino 2020.3 (https://docs.openvinotoolkit.org/2020.3/_docs_install_guides_installing_openvino_linux.html)
 
 3. AprilTags from: https://github.com/AprilRobotics/apriltag
 
