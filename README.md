@@ -27,11 +27,20 @@ Let's compile the whole thing:
     cmake ..
     make
 
+Installing node modules:
+
+    cd node
+    npm install
+
 ## Testing Installation
 
 Start yakuake terminal emulator
 
 *cd* to $ROBOCOMP/components/sa3ir
+
+Start the web server:
+
+nodejs server.js
 
 Let's run the use case:
 
