@@ -1,0 +1,14 @@
+import "TagBasedLocalization.idsl";
+import "MiraLaser.idsl";
+import "PersonSa3ir.idsl";
+
+Component trolleyDetector
+{
+	Communications
+	{
+        requires TagBasedLocalization, PersonToAgent;
+        implements Laser;
+	};
+	language Cpp;
+};
+

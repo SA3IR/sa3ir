@@ -6,7 +6,7 @@
 
 2. Install RealSense (https://github.com/IntelRealSense/librealsense/blob/master/doc/distribution_linux.md) and OpenVino 2020.3 (https://docs.openvinotoolkit.org/2020.3/_docs_install_guides_installing_openvino_linux.html)
 
-3. AprilTags from: https://github.com/AprilRobotics/apriltag
+3. Install OpenVino from https://github.com/openvinotoolkit/openvino
 
 4. Make sure you have installed the following packages from the Ubuntu repository:
 
