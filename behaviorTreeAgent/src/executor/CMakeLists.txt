@@ -48,7 +48,6 @@ find_package(ZMQ REQUIRED)
 
 #############################################################
 
-
 add_executable(${PROJECT_NAME}
   src/deliver_object.cpp
   src/detect_object.cpp
@@ -61,6 +60,8 @@ add_executable(${PROJECT_NAME}
   src/executor.cpp
   src/variant_action.cpp
   src/executor.cpp
+  src/rotateLeft.cpp
+  src/rotateRight.cpp
   src/move_roboter_position.cpp
   )
 

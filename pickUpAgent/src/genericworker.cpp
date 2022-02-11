@@ -1,5 +1,5 @@
 /*
- *    Copyright (C)2020 by YOUR NAME HERE
+ *    Copyright (C)2021 by YOUR NAME HERE
  *
  *    This file is part of RoboComp
  *
@@ -23,6 +23,8 @@
 GenericWorker::GenericWorker(MapPrx& mprx) :
 QObject()
 {
+	localnavigator_proxy = (*(LocalNavigatorPrx*)mprx["LocalNavigatorProxy"]);
+	laserreporter_proxy = (*(LaserReporterPrx*)mprx["LaserReporterProxy"]);
 	agmexecutive_proxy = (*(AGMExecutivePrx*)mprx["AGMExecutiveProxy"]);
 
 	mutex = new QMutex(QMutex::Recursive);

@@ -1,5 +1,5 @@
 /*
- *    Copyright (C) 2020 by YOUR NAME HERE
+ *    Copyright (C) 2021 by YOUR NAME HERE
  *
  *    This file is part of RoboComp
  *
@@ -84,6 +84,8 @@
 #include <agmcommonbehaviorI.h>
 #include <agmexecutivetopicI.h>
 
+#include <Navigator.h>
+#include <MiraLaser.h>
 
 
 // User includes here
@@ -131,10 +133,46 @@ int ::pickUp::run(int argc, char* argv[])
 
 	int status=EXIT_SUCCESS;
 
+	LocalNavigatorPrx localnavigator_proxy;
+	LaserReporterPrx laserreporter_proxy;
 	AGMExecutivePrx agmexecutive_proxy;
 
 	string proxy, tmp;
 	initialize();
+
+
+	try
+	{
+		if (not GenericMonitor::configGetString(communicator(), prefix, "LocalNavigatorProxy", proxy, ""))
+		{
+			cout << "[" << PROGRAM_NAME << "]: Can't read configuration for proxy LocalNavigatorProxy\n";
+		}
+		localnavigator_proxy = LocalNavigatorPrx::uncheckedCast( communicator()->stringToProxy( proxy ) );
+	}
+	catch(const Ice::Exception& ex)
+	{
+		cout << "[" << PROGRAM_NAME << "]: Exception: " << ex;
+		return EXIT_FAILURE;
+	}
+	rInfo("LocalNavigatorProxy initialized Ok!");
+	mprx["LocalNavigatorProxy"] = (::IceProxy::Ice::Object*)(&localnavigator_proxy);//Remote server proxy creation example
+
+
+	try
+	{
+		if (not GenericMonitor::configGetString(communicator(), prefix, "LaserReporterProxy", proxy, ""))
+		{
+			cout << "[" << PROGRAM_NAME << "]: Can't read configuration for proxy LaserReporterProxy\n";
+		}
+		laserreporter_proxy = LaserReporterPrx::uncheckedCast( communicator()->stringToProxy( proxy ) );
+	}
+	catch(const Ice::Exception& ex)
+	{
+		cout << "[" << PROGRAM_NAME << "]: Exception: " << ex;
+		return EXIT_FAILURE;
+	}
+	rInfo("LaserReporterProxy initialized Ok!");
+	mprx["LaserReporterProxy"] = (::IceProxy::Ice::Object*)(&laserreporter_proxy);//Remote server proxy creation example
 
 
 	try

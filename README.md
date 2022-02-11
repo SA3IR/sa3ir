@@ -2,11 +2,11 @@
 
 ## Requirements
 
-1. Installe the BehaviorTree.CPP library from https://gitlab.com/aromerogarces/behaviortree.git
+1. Install the BehaviorTree.CPP library from https://gitlab.com/aromerogarces/behaviortree.git
 
-2. Install RealSense and OpenVino using the installer script available in https://gitlab.com/aromerogarces/installers-sa3ir
+2. Install RealSense (https://github.com/IntelRealSense/librealsense/blob/master/doc/distribution_linux.md) and OpenVino 2020.3 (https://docs.openvinotoolkit.org/2020.3/_docs_install_guides_installing_openvino_linux.html)
 
-3. AprilTags from: https://github.com/AprilRobotics/apriltag
+3. Install OpenVino from https://github.com/openvinotoolkit/openvino
 
 4. Make sure you have installed the following packages from the Ubuntu repository:
 
@@ -27,11 +27,20 @@ Let's compile the whole thing:
     cmake ..
     make
 
+Installing node modules:
+
+    cd node
+    npm install
+
 ## Testing Installation
 
 Start yakuake terminal emulator
 
 *cd* to $ROBOCOMP/components/sa3ir
+
+Start the web server:
+
+nodejs server.js
 
 Let's run the use case:
 

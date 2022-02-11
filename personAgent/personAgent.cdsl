@@ -5,7 +5,7 @@ Component personAgent
 {
 	Communications
 	{
-		requires PersonToAgent;
+		implements PersonToAgent;
 	};
 	language Cpp;
 	options agmagent;

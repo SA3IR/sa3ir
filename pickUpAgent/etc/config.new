@@ -10,6 +10,8 @@ AGMExecutiveTopicTopic.Endpoints=tcp -p 0
 
 
 # Proxies for required interfaces
+LocalNavigatorProxy = localnavigator:tcp -h localhost -p 0
+LaserReporterProxy = laserreporter:tcp -h localhost -p 0
 AGMExecutiveProxy = agmexecutive:tcp -h localhost -p 0
 
 

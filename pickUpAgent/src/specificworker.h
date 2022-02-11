@@ -25,6 +25,22 @@
 #include <thread>
 #include <chrono>
 
+typedef struct {
+    double x;
+    double z;
+    double angle;
+}Robot2DPoint;
+
+typedef enum pickUpStatusT{
+    IDLE,
+    ROTATING,
+    APPROACHING,
+    DETECTING,
+    WAITING_FOR_DETECTION,
+    DETECTION_FINISHED,
+    FORKINGUP
+}pickUpStatus;
+
 class SpecificWorker : public GenericWorker
 {
 Q_OBJECT
@@ -54,13 +70,16 @@ private:
     bool worldChanged;
     bool flagStop;
     bool startPickUpProcess;
-    bool pickUpFinished;
+    bool pickUpFinished, pickUpFinishedTmp;
     struct ObjectLocation {
         double x;
         double y;
         double z;
         double angle;
     } objectPos;
+    
+    pickUpStatus prev_pick_status, prev_pick_status_tmp;
+    
 	std::string action;
 	ParameterMap params;
 	AGMModel::SPtr worldModel;
@@ -71,6 +90,11 @@ private:
 	void publishModelModification();
     void pickUpProcess();
     void removeHasAndDeliverLinks(bool& modelModified);
+    Robot2DPoint calculaPoseGlobalMIRASA3IR(const Robot2DPoint& poseRobot, const Robot2DPoint& poseLocal);
+    void rotateTrolley();
+    void moveTrolleyBackwards();
+    void updateGoal(const Robot2DPoint& goal);
+    void forkUp();
 };
 
 #endif

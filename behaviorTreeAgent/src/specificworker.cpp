@@ -502,6 +502,22 @@ void SpecificWorker::initBehaviorTree()
     };
     factory.registerBuilder(manif, move_default_deliver);
     
+    manif.type = NodeType::ACTION;
+    manif.registration_ID = "rotateLeft";
+    auto rotateLeft = [this](const std::string& name, const NodeConfiguration& config)
+    {
+        return std::unique_ptr<TreeNode>(new RotateLeft(this, name, config));
+    };
+    factory.registerBuilder(manif, rotateLeft);
+    
+    manif.type = NodeType::ACTION;
+    manif.registration_ID = "rotateRight";
+    auto rotateRight = [this](const std::string& name, const NodeConfiguration& config)
+    {
+        return std::unique_ptr<TreeNode>(new RotateRight(this, name, config));
+    };
+    factory.registerBuilder(manif, rotateRight);
+    
     
     manif.type = NodeType::ACTION;
     manif.registration_ID = "VariantAction";

@@ -155,6 +155,7 @@ void SpecificWorker::batteryLevel()
 			if ( previousBatteryLevel != batteryLevel ) 
 			{
 				previousBatteryLevel = batteryLevel;
+#ifdef MIRON_TOOLS
 				if ( batteryLevel == "high" ) {
 					sendEnum ( "BatteryLevel", "HIGH" ); //NO hay VERY_HIGH
                 } else if ( batteryLevel == "medium" )  {
@@ -164,6 +165,9 @@ void SpecificWorker::batteryLevel()
                 } else {// if ( batteryLevel == "verylow" ) 
 					sendEnum ( "BatteryLevel", "VERYLOW" );	
                 }
+#else
+            sendInt("BatteryLevel", str2int(batteryLevel));       
+#endif
 			}
 		}
 		catch(...)
@@ -183,6 +187,7 @@ void SpecificWorker::peopleDetected()
 		if ( npersons != npersons_prev )
 		{
             npersons_prev = npersons;
+#ifdef MIRON_TOOLS
             string value;
             if ((npersons > 3) && (prev_enum_value != "FULL")) {
                 value = "FULL";
@@ -197,6 +202,9 @@ void SpecificWorker::peopleDetected()
                 prev_enum_value = value;
                 sendEnum ("PeopleInRoom", value);
             }
+#else
+            sendInt("PeopleInRoom", npersons);
+#endif
 		
 		}	
 	} 
@@ -252,30 +260,6 @@ void SpecificWorker::sendBool(const std::string& name, const bool& value)
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
-
-
-//	THE FOLLOWING IS JUST AN EXAMPLE for AGENTS
-//	try
-//	{
-//		RoboCompCommonBehavior::Parameter par = params.at("NameAgent.InnerModel") ;
-//		if( QFile(QString::fromStdString(par.value)).exists() == true)
-//		{
-//			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Reading Innermodel file " << QString::fromStdString(par.value);
-//			innerModel = new InnerModel(par.value);
-//			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file read OK!" ;
-//		}
-//		else
-//		{
-//			qDebug() << __FILE__ << __FUNCTION__ << __LINE__ << "Innermodel file " << QString::fromStdString(par.value) << " does not exists";
-//			qFatal("Exiting now.");
-//		}
-//	}
-//	catch(std::exception e)
-//	{
-//		qFatal("Error reading config params");
-//	}
-
-	
 	timer.start(Period);
 	
 	try

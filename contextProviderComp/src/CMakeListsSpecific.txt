@@ -19,4 +19,5 @@ INCLUDE($ENV{ROBOCOMP}/cmake/modules/ipp.cmake)
 SET( LIBS ${LIBS} -L$ENV{OSPL_HOME}/lib -L$ENV{ROQME_ROOT}/cpp/roqmeDDS/lib -ldcpsgapi -lddsdatabase -lddsos -lddskernel -ldcpsisocpp2 -lroqmedds )
 
 ADD_DEFINITIONS( -std=c++11 -DROQME_CLARC )
+#-DMIRON_TOOLS )
 

@@ -3,7 +3,7 @@ CommonBehavior.Endpoints=tcp -p 10000
 
 # Endpoints for implemented interfaces
 AGMCommonBehavior.Endpoints=tcp -p 0
-AprilBasedLocalization.Endpoints=tcp -p 0
+TagBasedLocalization.Endpoints=tcp -p 0
 
 
 # Endpoints for subscriptions

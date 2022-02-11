@@ -54,7 +54,10 @@ public:
 	void symbolsUpdated(const RoboCompAGMWorldModel::NodeSequence &modification);
     
     //AprilBAsedLocalization interface
-    void newAprilBasedPose(const float x, const float z, const float alpha);
+    void newTagBasedPose(const float x, const float z, const float alpha);
+    void pickUpPoseInfo(const double& x, const double& z, const double& alpha);
+    void deliverFinishedPoseInfo(const double& x, const double& z, const double& alpha);
+    void trolleyPoseInfo(const double &x, const double &z, const double &alpha, const TrolleyRectangle &lines);
 
 public slots:
 	void compute(); 	
@@ -64,21 +67,33 @@ private:
     bool flagStop;
     bool objectRecognitionFinished;
     bool startObjectRecognition;
+    bool readingFromLaser;
+    bool new_data_available;
     
-    Robot2DPoint robotGoalFromCamera;
+    enum DetectingLaserStateT
+    {
+        IDLE,
+        DETECTING,
+        FINISHED
+    } detectingLaserState;
+    
+    Robot2DPoint robotGoalFromCamera, pickUpPoint, pickUpPointLaser, deliverFinishedPoint;
+    double angle_correction;
 	std::string action;
 	ParameterMap params;
 	AGMModel::SPtr worldModel;
 	InnerModel *innerModel;
 	bool active;
-    std::chrono::time_point<std::chrono::system_clock> startTime;
-    std::chrono::time_point<std::chrono::system_clock> endTime;
+    std::chrono::time_point<std::chrono::system_clock> startTime, startLaserDetectionTime;
+    std::chrono::time_point<std::chrono::system_clock> endTime, endLaserDetectionTime;
     bool timerStarted;
+    bool timerLaserDetectionStarted;
 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
 	void sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel);
     void publishModelModification();
     
     Robot2DPoint calculaPoseGlobalMIRASA3IR(const Robot2DPoint& poseRobot, const Robot2DPoint& poseLocal);
+    void laserDetection(bool& model_modified);
 	
 };
 

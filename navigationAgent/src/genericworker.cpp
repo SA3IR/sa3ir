@@ -1,5 +1,5 @@
 /*
- *    Copyright (C)2020 by YOUR NAME HERE
+ *    Copyright (C)2021 by YOUR NAME HERE
  *
  *    This file is part of RoboComp
  *
@@ -26,7 +26,7 @@ QObject()
 	localnavigator_proxy = (*(LocalNavigatorPrx*)mprx["LocalNavigatorProxy"]);
 	agmexecutive_proxy = (*(AGMExecutivePrx*)mprx["AGMExecutiveProxy"]);
 
-	mutex = new QMutex(QMutex::NonRecursive);
+	mutex = new QMutex(QMutex::Recursive);
 
 	Period = BASIC_PERIOD;
 	connect(&timer, SIGNAL(timeout()), this, SLOT(compute()));

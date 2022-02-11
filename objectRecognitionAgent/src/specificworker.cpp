@@ -33,6 +33,10 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
     objectRecognitionFinished = false;
     startObjectRecognition = false;
     timerStarted = false;
+    readingFromLaser = false;
+    new_data_available = false;
+    detectingLaserState = IDLE;
+    timerLaserDetectionStarted = false;
 }
 
 /**
@@ -69,7 +73,7 @@ void SpecificWorker::compute()
             }
             else {
                 endTime = std::chrono::system_clock::now();
-                if(std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count() >= 10000) {
+                if(std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count() >= 5000) { //we abort after 5 seconds
                     timerStarted = false;
                     try
                     {
@@ -91,10 +95,14 @@ void SpecificWorker::compute()
                         worldModel->removeEdgeByIdentifiers(3, 6, "is");
                         modelModified = true;
                         worldModel->addEdgeByIdentifiers(3, 6, "finish"); 
+
                         modelModified = true;
                         
                         worldModel->getSymbol(6)->setAttribute("result", "OK");
                         
+                        //TODO: refactorizar todo esto!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                        
+                        //*********************** Goal position for navigation process ***************
                         Robot2DPoint robotGlobalPose;
                         robotGlobalPose.x = str2float(worldModel->getSymbol(9)->getAttribute("x"));;
                         robotGlobalPose.z =  str2float(worldModel->getSymbol(9)->getAttribute("z"));;
@@ -104,21 +112,47 @@ void SpecificWorker::compute()
                         robotLocalPose.x = robotGoalFromCamera.z;
                         robotLocalPose.z = -robotGoalFromCamera.x;
                         robotLocalPose.angle = -robotGoalFromCamera.angle;
-                        //robotLocalPose.x = robotGoalFromCamera.x;
-                        //robotLocalPose.z = robotGoalFromCamera.z;
-                        //robotLocalPose.angle = robotGoalFromCamera.angle;
+                       
+                        Robot2DPoint robotGoal = calculaPoseGlobalMIRASA3IR (robotGlobalPose, robotLocalPose); 
+                        std::cout << "robotGoal: (x = " << robotGoal.x  <<  ",z = " << robotGoal.z << ", angle = " << robotGoal.angle  << ")" << std::endl;
                         
-                       // std::cout <<  robotGlobalPose.x  << "" << robotGlobalPose.z << " " << robotGlobalPose.angle  << " " << robotLocalPose.x << " " << robotLocalPose.z << " " << robotLocalPose.angle << std::endl;
-                        Robot2DPoint robotGoal = calculaPoseGlobalMIRASA3IR (robotGlobalPose, robotLocalPose);
-                        std::cout <<  robotGoal.x  << "" << robotGoal.z << " " << robotGoal.angle  << std::endl;
                         //Ponemos el goal en el nodo navegación 
                         worldModel->getSymbol(5)->setAttribute("x", float2str(robotGoal.x));
                         worldModel->getSymbol(5)->setAttribute("z", float2str(robotGoal.z));
                         worldModel->getSymbol(5)->setAttribute("angle", float2str(robotGoal.angle));
-                        // Por ahora, ponemos la posición dentro del mapa directamente:
-                        //worldModel->getSymbol(5)->setAttribute("x", float2str(robotGoalFromCamera.x));
-                        //worldModel->getSymbol(5)->setAttribute("z", float2str(robotGoalFromCamera.z));
-                        //worldModel->getSymbol(5)->setAttribute("angle", float2str(robotGoalFromCamera.angle));
+                        worldModel->getSymbol(5)->setAttribute("angle_correction", float2str(angle_correction));
+                        //*******************************************************************************
+                        
+                        
+                        // *********************  Goal position for the pickUp process ********************
+                        robotLocalPose.x = pickUpPoint.z;
+                        robotLocalPose.z = -pickUpPoint.x;
+                        robotLocalPose.angle = -pickUpPoint.angle;
+                       
+                        robotGoal = calculaPoseGlobalMIRASA3IR (robotGlobalPose, robotLocalPose); 
+                        std::cout << "robotGoalPickUp: (x = " << robotGoal.x  <<  ",z = " << robotGoal.z << ", angle = " << robotGoal.angle  << ")" << std::endl;
+                        
+                        //Ponemos el goal en el pickUp 
+                        worldModel->getSymbol(7)->setAttribute("x", float2str(robotGoal.x));
+                        worldModel->getSymbol(7)->setAttribute("z", float2str(robotGoal.z));
+                        worldModel->getSymbol(7)->setAttribute("angle", float2str(robotGoal.angle));
+                        //****************************************************
+                       
+                        // *********************  Goal position for the delivery finished process ********************
+                        robotLocalPose.x = deliverFinishedPoint.z;
+                        robotLocalPose.z = -deliverFinishedPoint.x;
+                        robotLocalPose.angle = -deliverFinishedPoint.angle;
+                       
+                        robotGoal = calculaPoseGlobalMIRASA3IR (robotGlobalPose, robotLocalPose); 
+                        std::cout << "deliverFinishedPoint: (x = " << robotGoal.x  <<  ",z = " << robotGoal.z << ", angle = " << robotGoal.angle  << ")" << std::endl;
+                        
+                        //Ponemos el goal para finalizar el delivery 
+                        worldModel->getSymbol(8)->setAttribute("x", float2str(robotGoal.x));
+                        worldModel->getSymbol(8)->setAttribute("z", float2str(robotGoal.z));
+                        worldModel->getSymbol(8)->setAttribute("angle", float2str(robotGoal.angle));
+                        //****************************************************
+                        
+                        
                         modelModified = true;
                         timerStarted = false;
                     }
@@ -151,6 +185,9 @@ void SpecificWorker::compute()
                         
                 }       
             }
+            
+            //**** Estoy hay que probarl
+            laserDetection(modelModified);
         }
     }
     // Miramos si hay que publicar el modelo del mundo
@@ -160,6 +197,73 @@ void SpecificWorker::compute()
     }
 }
 
+void SpecificWorker::laserDetection(bool& model_modified)
+{
+    try
+    {
+        std::string pickUpAction = worldModel->getSymbol(7)->getAttribute("action");
+        if(pickUpAction == "waiting_for_detection" && detectingLaserState == IDLE)
+        {
+            readingFromLaser = true;
+            detectingLaserState = DETECTING;
+            if(!timerLaserDetectionStarted){
+                std::cout << "Iniciando timer" << std::endl;
+                startLaserDetectionTime = std::chrono::system_clock::now();
+            }
+        }
+        else if(detectingLaserState == DETECTING)
+        {
+            endLaserDetectionTime = std::chrono::system_clock::now();
+            if(std::chrono::duration_cast<std::chrono::milliseconds>(endLaserDetectionTime - startLaserDetectionTime).count() >= 2000) { //we abort after 5 seconds
+                timerLaserDetectionStarted = false;
+                std::cout << "Finalizando timer" << std::endl;
+                detectingLaserState = FINISHED;
+            }
+        }
+
+        if(detectingLaserState == FINISHED)
+        {
+            worldModel->getSymbol(7)->setAttribute("action","detection_finished");
+            model_modified = true;
+            std::cout << "vamos a ver si hay datos" << std::endl;
+            if(new_data_available) {
+                //*********************  Goal position for the pickUp process ********************
+                Robot2DPoint robotGlobalPose;
+                robotGlobalPose.x = str2float(worldModel->getSymbol(9)->getAttribute("x"));;
+                robotGlobalPose.z =  str2float(worldModel->getSymbol(9)->getAttribute("z"));;
+                robotGlobalPose.angle = str2float(worldModel->getSymbol(9)->getAttribute("angle"));;
+                
+                Robot2DPoint robotLocalPose;
+                robotLocalPose.x = -pickUpPointLaser.z;
+                robotLocalPose.z = -pickUpPointLaser.x;
+                robotLocalPose.angle = -pickUpPointLaser.angle;
+                
+                Robot2DPoint robotGoal = calculaPoseGlobalMIRASA3IR (robotGlobalPose, robotLocalPose); 
+                std::cout << "robotGlobalPoseUppppppppppppppppp: (x = " << robotGlobalPose.x  <<  ",z = " << robotGlobalPose.z << ", angle = " << robotGlobalPose.angle  << ")" << std::endl;
+                std::cout << "robotLocalPoseUppppppppppppppppp: (x = " << robotLocalPose.x  <<  ",z = " << robotLocalPose.z << ", angle = " << robotLocalPose.angle  << ")" << std::endl;
+                std::cout << "robotGoalPickUppppppppppppppppp: (x = " << robotGoal.x  <<  ",z = " << robotGoal.z << ", angle = " << robotGoal.angle  << ")" << std::endl;
+                std::cout << "PickUppppppppppppppppp: (x = " << pickUpPointLaser.x  <<  ",z = " << pickUpPointLaser.z << ", angle = " << pickUpPointLaser.angle << ")" << std::endl;
+                
+                //Ponemos el goal en el pickUp 
+                worldModel->getSymbol(7)->setAttribute("x", float2str(robotGoal.x));
+                worldModel->getSymbol(7)->setAttribute("z", float2str(robotGoal.z));
+                worldModel->getSymbol(7)->setAttribute("angle", float2str(robotGoal.angle));
+                                
+                model_modified = true;
+                readingFromLaser = false;
+                new_data_available = false;
+                detectingLaserState = IDLE;
+            }
+        }
+    }  
+    catch(...)
+    {
+        if(detectingLaserState != IDLE)
+        {
+            detectingLaserState = IDLE;
+        }
+    }
+}
 
 // ----------------------------------------------------------
 // PARAMETERS:
@@ -186,14 +290,92 @@ Robot2DPoint SpecificWorker::calculaPoseGlobalMIRASA3IR(const Robot2DPoint& pose
 	return poseGlobal;
 }
 
-void SpecificWorker::newAprilBasedPose(const float x, const float z, const float alpha)
+void SpecificWorker::newTagBasedPose(const float x, const float z, const float alpha)
 {
     QMutexLocker locker(mutex);
     if(timerStarted) {
         robotGoalFromCamera.x = x;
         robotGoalFromCamera.z = z;
         robotGoalFromCamera.angle = alpha;
+        std::cout << "newTagBasedPose: " << x << " " << z << " " << alpha << std::endl; 
         objectRecognitionFinished = true;
+    }
+}
+
+void SpecificWorker::pickUpPoseInfo(const double& x, const double& z, const double& alpha)
+{
+    QMutexLocker locker(mutex);
+    if(timerStarted || readingFromLaser) {
+        if(readingFromLaser){
+            std::cout << "recibiendo lecturas del laser" << std::endl;
+            new_data_available = true;
+            pickUpPointLaser.x = x;
+            pickUpPointLaser.z = z;
+            pickUpPointLaser.angle = alpha;
+        }
+        else
+        {
+            pickUpPoint.x = x;
+            pickUpPoint.z = z;
+            pickUpPoint.angle = alpha;
+        }
+    }
+}
+
+void SpecificWorker::deliverFinishedPoseInfo(const double& x, const double& z, const double& alpha)
+{
+    QMutexLocker locker(mutex);
+    if(timerStarted) {
+        deliverFinishedPoint.x = x;
+        deliverFinishedPoint.z = z;
+        deliverFinishedPoint.angle = alpha;
+    }
+}
+
+void SpecificWorker::trolleyPoseInfo(const double& x, const double& z, const double& alpha, const TrolleyRectangle& lines)
+{
+    QMutexLocker locker(mutex);
+   if(timerStarted) {
+        robotGoalFromCamera.x = x;
+        robotGoalFromCamera.z = z;
+        robotGoalFromCamera.angle = alpha;
+        std::cout << "trolleyPoseInfo: " << x << " " << z << " " << alpha << std::endl; 
+        objectRecognitionFinished = true;
+        
+        if(lines.size() == 4) //four lines means that the robot sees all the wheels
+        {
+            double angle1 = lines[2].angle;
+            double angle2 = lines[3].angle;
+            double angle1_aux, angle2_aux;
+            //std::cout << angle1 << " " << angle2 << std::endl;
+            
+            //TODO: Another solution: test taking the line with lower length
+            
+            if(angle1 >= 0)
+                angle1_aux = 90 - angle1;
+            else
+                angle1_aux = abs(angle1)-90 ;
+            
+            
+            if(angle2 >= 0)
+                angle2_aux = 90 - angle2;
+            else
+                angle2_aux = abs(angle2)-90 ;
+            
+            angle_correction = (angle1_aux+angle2_aux)/2;
+            
+        }
+        else if(lines.size() == 2) //three lines means that the robot sees only three the wheels
+        {
+            //tengo que ver de donde viene
+            double angle = lines[1].angle;
+            //std::cout << angle << std::endl;
+            if(angle >= 0)
+                angle_correction = 90 - angle;
+            else
+                angle_correction = abs(angle)-90 ;
+            
+        }
     }
 }
 

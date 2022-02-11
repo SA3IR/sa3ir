@@ -1,8 +1,11 @@
-import "AGMWorldModel.idsl";
+import "Navigator.idsl";
+import "MiraLaser.idsl";
+
 Component pickUp
 {
 	Communications
 	{
+        requires LocalNavigator, LaserReporter;
 	};
 	language Cpp;
 	options agmagent;

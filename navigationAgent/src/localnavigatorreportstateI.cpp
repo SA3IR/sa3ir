@@ -1,5 +1,5 @@
 /*
- *    Copyright (C) 2020 by YOUR NAME HERE
+ *    Copyright (C) 2021 by YOUR NAME HERE
  *
  *    This file is part of RoboComp
  *
@@ -28,9 +28,9 @@ LocalNavigatorReportStateI::~LocalNavigatorReportStateI()
 {
 }
 
-void LocalNavigatorReportStateI::reportRobotState(const float  distanceToGoal, const float  angToGoal, const int  timeElapsed,  navigationState  state, const Ice::Current&)
+void LocalNavigatorReportStateI::reportAPTSensor(const float  distance, const Ice::Current&)
 {
-	worker->reportRobotState(distanceToGoal, angToGoal, timeElapsed, state);
+	worker->reportAPTSensor(distance);
 }
 
 void LocalNavigatorReportStateI::reportRobotBatteryLevel(const RobotBatteryLevel  &batteryLevel, const Ice::Current&)
@@ -41,5 +41,20 @@ void LocalNavigatorReportStateI::reportRobotBatteryLevel(const RobotBatteryLevel
 void LocalNavigatorReportStateI::reportRobotPose(const float  x, const float  z, const float  angle, const Ice::Current&)
 {
 	worker->reportRobotPose(x, z, angle);
+}
+
+void LocalNavigatorReportStateI::reportRobotState(const float  distanceToGoal, const float  angToGoal, const int  timeElapsed,  navigationState  state, const Ice::Current&)
+{
+	worker->reportRobotState(distanceToGoal, angToGoal, timeElapsed, state);
+}
+
+void LocalNavigatorReportStateI::reportLimitSwitchState( bool  state, const Ice::Current&)
+{
+	worker->reportLimitSwitchState(state);
+}
+
+void LocalNavigatorReportStateI::reportForkLiftState(const string  &status, const Ice::Current&)
+{
+	worker->reportForkLiftState(status);
 }
 

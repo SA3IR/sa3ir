@@ -26,6 +26,8 @@ SET ( SOURCES
   executor/src/moveToDefaultDeliverArea.cpp
   executor/src/doNothing.cpp
   executor/src/moveToStart.cpp
+  executor/src/rotateLeft.cpp
+  executor/src/rotateRight.cpp
 )
 
 # Headers set
@@ -49,6 +51,8 @@ SET ( HEADERS
   executor/include/moveToDeliverArea.hpp
   executor/include/moveToDefaultDeliverArea.hpp
   executor/include/moveToStart.hpp
+  executor/include/rotateLeft.cpp
+  executor/include/rotateRight.cpp
 )
 
 INCLUDE($ENV{ROBOCOMP}/cmake/modules/ipp.cmake)

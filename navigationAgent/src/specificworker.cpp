@@ -41,8 +41,13 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 	goalPosition.x = 0; 
 	goalPosition.z = 0;
 	goalPosition.angle = 0;
-
-	
+    
+    movingFordwards = true;
+    
+    forkingState = IDLE;
+#ifndef MIRON_TOOLS
+    batteryPercentLevel = 0;
+#endif
 }
 
 /**
@@ -82,9 +87,10 @@ void SpecificWorker::compute()
     }
     catch(...)
     {
-        
+        pickUpTrolley(model_modified);
         if(worldChanged)
         {
+            
             modifyingNavigationEdge(model_modified);
             worldChanged = false;
         }
@@ -106,6 +112,8 @@ void SpecificWorker::compute()
                 worldModel->addEdgeByIdentifiers(3, 5, "finish"); 
                 model_modified = true;	
                 worldModel->getSymbol(5)->setAttribute("result", "OK");
+                model_modified = true;
+                worldModel->getSymbol(9)->setAttribute("place", goal);
                 model_modified = true;
             }
             catch(...)
@@ -165,7 +173,11 @@ void SpecificWorker::compute()
             {
                 try
                 {
+#ifdef MIRON_TOOLS                    
                     worldModel->getSymbol(battery_symbol)->setAttribute("level", batteryLevel);
+#else
+                    worldModel->getSymbol(battery_symbol)->setAttribute("level", int2str(batteryPercentLevel));
+#endif
                     model_modified = true;
                 }
                 catch(...)
@@ -248,7 +260,7 @@ void SpecificWorker::setGoal()
     {    
         std::string currentAction_ = worldModel->getSymbol(3)->getAttribute("lastAction");
         std::cout << currentAction_ << std::endl;
-        if(currentAction_ != "approach")
+        if(currentAction_ != "approach" && currentAction_ != "pickUp")
         {
             if(currentAction_ == "moveToDock")
             {
@@ -277,9 +289,53 @@ void SpecificWorker::setGoal()
             worldModel->getSymbol(5)->setAttribute("goal", goal);
             worldModel->getSymbol(5)->setAttribute("x", float2str(goalPosition.x));
             worldModel->getSymbol(5)->setAttribute("z", float2str(goalPosition.z));
-            worldModel->getSymbol(5)->setAttribute("angle", float2str(goalPosition.angle));
-                
+            
+            if(currentAction_ == "rotateLeft")
+            {
+                worldModel->getSymbol(5)->setAttribute("angle", float2str(goalPosition.angle+0.39));
+            }
+            else if(currentAction_ == "rotateRight")
+            {
+                worldModel->getSymbol(5)->setAttribute("angle", float2str(goalPosition.angle-0.79));
+            }
+            else
+            {   
+                worldModel->getSymbol(5)->setAttribute("angle", float2str(goalPosition.angle));
+            }
         }
+        if(worldModel->getSymbol(5)->getAttribute("move") == "backwards")
+            movingFordwards = false;
+        else 
+            movingFordwards = true;
+        
+     /*   try
+        {
+            worldModel->getEdgeByIdentifiers(3, 7, "is");
+            Pose2D goalPosition;
+            goalPosition.x = str2float(worldModel->getSymbol(7)->getAttribute("x"));	
+            goalPosition.z = str2float(worldModel->getSymbol(7)->getAttribute("z"));	
+            goalPosition.angle = str2float(worldModel->getSymbol(7)->getAttribute("angle"));
+            worldModel->getSymbol(5)->setAttribute("x", float2str(goalPosition.x));
+            worldModel->getSymbol(5)->setAttribute("z", float2str(goalPosition.z));
+            worldModel->getSymbol(5)->setAttribute("angle", float2str(goalPosition.angle));
+            
+        }
+        catch(...){}
+       */ 
+        try
+        {
+            worldModel->getEdgeByIdentifiers(3, 8, "is"); //haciendo el delivering
+            Pose2D goalPosition;
+            goalPosition.x = str2float(worldModel->getSymbol(8)->getAttribute("x"));	
+            goalPosition.z = str2float(worldModel->getSymbol(8)->getAttribute("z"));	
+            goalPosition.angle = str2float(worldModel->getSymbol(8)->getAttribute("angle"));
+            worldModel->getSymbol(5)->setAttribute("x", float2str(goalPosition.x));
+            worldModel->getSymbol(5)->setAttribute("z", float2str(goalPosition.z));
+            worldModel->getSymbol(5)->setAttribute("angle", float2str(goalPosition.angle));
+            
+        }
+        catch(...){}
+            
     }
     catch(...)
     {
@@ -365,6 +421,36 @@ void SpecificWorker::setNearestGoalPosition(const std::string& link)
    // }
 }
 
+void SpecificWorker::pickUpTrolley(bool& model_modified)
+{
+    try
+    {
+        std::string pickUpAction = worldModel->getSymbol(7)->getAttribute("action");
+        if(pickUpAction == "forkingup" && forkingState == IDLE)
+        {
+            forkUp();
+        }
+        else if(forkingState == FINISHED)
+        {
+            worldModel->getSymbol(7)->setAttribute("action","finished");
+            model_modified = true;
+            forkingState = IDLE;
+        }
+    }  
+    catch(...){}
+}
+
+
+void SpecificWorker::forkUp()
+{
+    try
+    {
+        forkingState = FORKINGUP;
+        localnavigator_proxy->forkLiftUp();
+    }
+    catch(...){}
+}
+
 float SpecificWorker::distanceToGoal(const std::string& label)
 {
     float distance = -1;
@@ -447,7 +533,7 @@ bool SpecificWorker::publishModelModification()
 			if(sendGoal)
 			{
 				qDebug("Enviando objetivo a mira");
-				sendGoalToMira(goalPosition.x, goalPosition.z, goalPosition.angle);
+				sendGoalToMira(goalPosition.x, goalPosition.z, goalPosition.angle, movingFordwards);
                 sendGoal = false;
                 qDebug("Enviando objetivo a mira terminado");                    
 			}
@@ -553,20 +639,23 @@ void SpecificWorker::reportRobotState(const float distanceToGoal, const float an
 {
 	QMutexLocker locker(mutex);
 	//cout << "(" << distanceToGoal << ", " << angToGoal << ", " << timeElapsed << ", " << state << ")" << endl;
-	navigationCurrentState = state;
-    if(state == navigationState::REACHED)
-		std::cout << "REACHED" << std::endl;
-	else if(state == navigationState::FAILED)
-		std::cout << "FAILED" << std::endl;
-	else if(state == navigationState::IDLE)
-		std::cout << "IDLE" << std::endl;
-	else
-		std::cout << "DRIVING" << std::endl;
-    if(navigationCurrentState == navigationState::REACHED || navigationCurrentState == navigationState::FAILED )
+    if(!flagStop)
+    {
+        navigationCurrentState = state;
+        if(state == navigationState::REACHED)
+            std::cout << "REACHED" << std::endl;
+        else if(state == navigationState::FAILED)
+            std::cout << "FAILED" << std::endl;
+        else if(state == navigationState::IDLE)
+            std::cout << "IDLE" << std::endl;
+    }
+	//else
+	//	std::cout << "DRIVING" << std::endl;
+    /*if(navigationCurrentState == navigationState::REACHED || navigationCurrentState == navigationState::FAILED )
     {
         gotoFinished = true;
         waitGotoResult.wakeAll();
-    }
+    }*/
     
 }
 
@@ -577,6 +666,35 @@ void SpecificWorker::reportRobotPose(const float x, const float z, const float a
 	currentRobotPose.x = x;
 	currentRobotPose.z = z;
 	currentRobotPose.angle = angle;
+}
+
+void SpecificWorker::reportForkLiftState(const string &status)
+{
+    std::cout << "forklift state: " << status << std::endl;
+    if(status == "Up" || status == "Down")
+        forkingState = FINISHED;
+}
+
+void SpecificWorker::reportAPTSensor(const float distance)
+{
+    QMutexLocker locker(mutex);
+    if(!movingFordwards && distance <= 0.15 && !flagStop)
+    {
+        std::cout << "reportAPTSensor: " << distance << std::endl;
+        navigationCurrentState = navigationState::REACHED;
+        flagStop = true;
+    }
+}
+
+void SpecificWorker::reportLimitSwitchState(const bool &state)
+{
+    QMutexLocker locker(mutex);
+    if(!movingFordwards && state && !flagStop)
+    {
+        std::cout << "reportLimitSwitchState: " << std::endl;
+        navigationCurrentState = navigationState::REACHED;
+        flagStop = true;
+    }
 }
 
 // AGM methods
@@ -602,54 +720,63 @@ void SpecificWorker::reportRobotBatteryLevel(const RobotBatteryLevel &batteryInf
        QMutexLocker locker(mutex);
 	
        robotCharging = batteryInfo.charging;
-       
-       static float voltage = 0.0f;
-       if(fabs(voltage - batteryInfo.voltage) >= 0.05f)
-       {
-               voltage = batteryInfo.voltage; 
+    
+#ifdef MIRON_TOOLS  
+        static float voltage = 0.0f;
+        if(fabs(voltage - batteryInfo.voltage) >= 0.05f)
+        {
+            voltage = batteryInfo.voltage; 
 
-               /*cout  << "charging: " << batteryInfo.charging 
-                       << ", voltage: " << batteryInfo.voltage 
-                       << ", current: " << batteryInfo.current 
-                       << ", lifePercent: " << batteryInfo.lifePercent 
-                       << ", powerSuppyPresent: " << batteryInfo.powerSupplyPresent 
-                       << ", lifeTime: " << batteryInfo.lifeTime;
-               
-               cout << ", cellVoltage: ";
-               int i = 0;
-               for (auto iter = batteryInfo.cvoltage.begin(); iter!= batteryInfo.cvoltage.end(); iter++)
-               {
-                       cout << "[cell " << i++ << ": " << *iter << "]";
-               }
-               cout << std::flush;*/
-               
-
-               static string previousBatteryLevel  = "";
-       
-               if(batteryInfo.voltage >= 26.0f)
-               {
-                       batteryLevel = "high";
-               }
-               else if(batteryInfo.voltage >= 25.0f && batteryInfo.voltage < 26.0f)
-               {
-                       batteryLevel = "medium";
-               }
-               else if(batteryInfo.voltage < 25.0f && batteryInfo.voltage > 24.5f)
-               {
-                       batteryLevel = "low";
-               }
-               else
-               {
-                       batteryLevel = "verylow";
-               }
-       
-               if(previousBatteryLevel != batteryLevel)
-               {
-                       previousBatteryLevel = batteryLevel;
-                       batteryLevelChanged = true;             
-                       cout << "voltage: " << batteryInfo.voltage << ", level: " << batteryLevel << endl;                      
-               }
-       }       
+            cout  << "charging: " << batteryInfo.charging 
+                    << ", voltage: " << batteryInfo.voltage 
+                    << ", current: " << batteryInfo.current 
+                    << ", lifePercent: " << batteryInfo.lifePercent 
+                    << ", powerSuppyPresent: " << batteryInfo.powerSupplyPresent 
+                    << ", lifeTime: " << batteryInfo.lifeTime;
+            
+            cout << ", cellVoltage: ";
+            int i = 0;
+            for (auto iter = batteryInfo.cvoltage.begin(); iter!= batteryInfo.cvoltage.end(); iter++)
+            {
+                    cout << "[cell " << i++ << ": " << *iter << "]";
+            }
+            cout << std::flush;
+                            
+            static string previousBatteryLevel  = "";
+    
+            if(batteryInfo.voltage >= 26.0f)
+            {
+                    batteryLevel = "high";
+            }
+            else if(batteryInfo.voltage >= 25.0f && batteryInfo.voltage < 26.0f)
+            {
+                    batteryLevel = "medium";
+            }
+            else if(batteryInfo.voltage < 25.0f && batteryInfo.voltage > 24.5f)
+            {
+                    batteryLevel = "low";
+            }
+            else
+            {
+                    batteryLevel = "verylow";
+            }
+    
+            if(previousBatteryLevel != batteryLevel)
+            {
+                    previousBatteryLevel = batteryLevel;
+                    batteryLevelChanged = true;             
+                    cout << "voltage: " << batteryInfo.voltage << ", level: " << batteryLevel << endl;                      
+            }
+        }
+#else
+        if(batteryPercentLevel != batteryInfo.lifePercent)
+        {
+            batteryPercentLevel = batteryInfo.lifePercent;
+            batteryLevelChanged = true; 
+            cout << "lifepercent: " << batteryPercentLevel << endl;   
+        }       
+#endif
+              
 }
 
 
@@ -776,12 +903,15 @@ void SpecificWorker::unDocking() const
 	}  
 }
 
-void SpecificWorker::sendGoalToMira(const float goalx, const float goalz,const float angle) const
+void SpecificWorker::sendGoalToMira(const float goalx, const float goalz,const float angle, bool moving_fordwards) const
 {
 	try
 	{
 		cout << "(" << goalx << ", " << goalz << ", " << angle << ")" << endl;
-		localnavigator_proxy->goTo(goalx, goalz, angle);
+        if(moving_fordwards)
+            localnavigator_proxy->goTo(goalx, goalz, angle);
+        else
+            localnavigator_proxy->goBackWardsTo(goalx, goalz, angle);
 	}
 	catch(Ice::Exception& e)
 	{

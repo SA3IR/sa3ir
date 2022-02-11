@@ -31,7 +31,10 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
     worldChanged = false;
     flagStop = false;
     pickUpFinished = false;
+    pickUpFinishedTmp = false;
     startPickUpProcess = true;
+    prev_pick_status = pickUpStatus::IDLE;
+    prev_pick_status_tmp = pickUpStatus::IDLE;;
 }
 
 /**
@@ -61,55 +64,110 @@ void SpecificWorker::compute()
     
         try
         {
-            worldModel->getEdgeByIdentifiers(3, 7, "is"); //ya estoy buscando el objeto
-            if(pickUpFinished)
+            worldModel->getEdgeByIdentifiers(3, 7, "is"); //ya estoy haciendo el pickup
+            try{
+                std::string forking_action = worldModel->getSymbol(7)->getAttribute("action");
+                if(forking_action == "finished")
+                {
+                   try
+                    {
+                        worldModel->removeEdgeByIdentifiers(3, 7, "is");
+                        worldModel->addEdgeByIdentifiers(3, 7, "finish"); 
+                        worldModel->getSymbol(7)->setAttribute("result", "OK"); //TODO: contemplar el caso de que no haya ido bien
+                        worldModel->getSymbol(7)->setAttribute("action", "");
+                        removeHasAndDeliverLinks(modelModified);
+                        modelModified = true;
+                    }
+                    catch(...){}   
+                }
+                else if(forking_action == "detection_finished")
+                {
+                    try
+                    {
+                        std::cout << "detection_finished" << std::endl;
+                        worldModel->removeEdgeByIdentifiers(3, 5, "finish");  //la navegación ha terminado
+                        worldModel->addEdgeByIdentifiers(3, 5, "start"); //le indicamos a la navegación un nuevo objetivo
+                        worldModel->getSymbol(7)->setAttribute("action", "approaching");
+                        if(prev_pick_status_tmp == pickUpStatus::WAITING_FOR_DETECTION)
+                        {
+                            std::cout << "desactivando laser" << std::endl;
+                            laserreporter_proxy->toggleLaserReport(false);
+                        }
+                        std::cout << "Guardando en AGM: moviendo hacia atrás" << std::endl;
+                        moveTrolleyBackwards();
+                        modelModified = true;
+                        prev_pick_status_tmp = pickUpStatus::FORKINGUP;
+                    }
+                    catch(...){}
+                }
+            }
+            catch(...){}
+            
+            if (prev_pick_status == pickUpStatus::ROTATING)
             {
-            // std::cout << __FILE__ << " " << __LINE__ << std::endl;
                 try
                 {
-                    worldModel->removeEdgeByIdentifiers(3, 7, "is");
+                     //Indicamos al navegador que se mueva
+                    std::cout << "Guardando en AGM: rotateTrolley..." << std::endl;
+                    worldModel->removeEdgeByIdentifiers(3, 5, "stopped");
+                    worldModel->addEdgeByIdentifiers(3, 5, "start"); 
+                    worldModel->getSymbol(7)->setAttribute("action", "rotating");
+                    rotateTrolley(); //ponemos el objetivo en el AGM (nodo pickup)        
                     modelModified = true;
-                    worldModel->addEdgeByIdentifiers(3, 7, "finish"); 
-                    modelModified = true;
-                    worldModel->getSymbol(7)->setAttribute("result", "OK"); //TODO: contemplar el caso de que no haya ido bien
-                    //Si va bien se añade el enlace "pickedUp", sino otro que lo indique.
-                    // std::cout << __FILE__ << " " << __LINE__ << std::endl;
-                 /*   try{
-                        worldModel->removeEdgeByIdentifiers(3, 10, "detected");
-                    }catch(...){}
-                    worldModel->addEdgeByIdentifiers(3, 10, "pickedUp"); 
-                    modelModified = true;*/
-                    removeHasAndDeliverLinks(modelModified);
-                   
-                    pickUpFinished = false;
+                    prev_pick_status_tmp = pickUpStatus::DETECTING;
                 }
-                catch(...)
+                catch(...){}
+            }
+            else if (prev_pick_status == pickUpStatus::DETECTING)
+            {
+                try
                 {
-                        
-                }   
+                    worldModel->getEdgeByIdentifiers(3, 5, "finish");  //la navegación ha terminado
+                    worldModel->getSymbol(7)->setAttribute("action", "waiting_for_detection");
+                    if(prev_pick_status_tmp == pickUpStatus::DETECTING)
+                    {
+                        laserreporter_proxy->toggleLaserReport(true);
+                    }
+                    std::cout << "Guardando en AGM: DETECTING" << std::endl;
+                    
+                    modelModified = true;
+                    prev_pick_status_tmp = pickUpStatus::WAITING_FOR_DETECTION;
+                }
+                catch(...){}
+            }
+            else if (prev_pick_status == pickUpStatus::FORKINGUP)
+            {
+                try
+                {
+                    worldModel->removeEdgeByIdentifiers(3, 5, "finish");  //la navegación ha terminado
+                    worldModel->addEdgeByIdentifiers(3, 5, "stopped");
+                    worldModel->getSymbol(5)->setAttribute("move", "forwards");
+                    worldModel->getSymbol(7)->setAttribute("action", "forkingup");
+                    modelModified = true;
+                    std::cout << "Guardando en AGM: elevando el carrito" << std::endl;
+                    prev_pick_status_tmp = pickUpStatus::IDLE;
+                }
+                catch(...){}
             }
         }
         catch(...)
         {
             try
             {
-            worldModel->getEdgeByIdentifiers(3, 7, "finish"); //ya ha terminado, no hago nada
+                worldModel->getEdgeByIdentifiers(3, 7, "finish"); //ya ha terminado, no hago nada
             }
             catch(...)
             {
                 try
                 {
                     worldModel->removeEdgeByIdentifiers(3, 7, "start"); //el BT indica que empiece el proceso
-                    modelModified = true;
-                    worldModel->addEdgeByIdentifiers(3, 7, "is"); 
-                    modelModified = true;
+                    worldModel->addEdgeByIdentifiers(3, 7, "is");
+                    worldModel->getSymbol(7)->setAttribute("action", "");
                     worldModel->getSymbol(7)->setAttribute("result", "");
-                    startPickUpProcess = true;
+                    modelModified = true;
+                    prev_pick_status_tmp = pickUpStatus::ROTATING;
                 }
-                catch(...)
-                {
-                        
-                }       
+                catch(...){}       
             }
         }
     }
@@ -120,9 +178,61 @@ void SpecificWorker::compute()
     }
 }
 
+void SpecificWorker::forkUp()
+{
+    try
+    {
+        localnavigator_proxy->forkLiftUp();
+    }
+    catch(...){}
+}
+
+void SpecificWorker::rotateTrolley()
+{
+    Robot2DPoint robotGlobalPose;
+    robotGlobalPose.x = str2float(worldModel->getSymbol(9)->getAttribute("x"));;
+    robotGlobalPose.z =  str2float(worldModel->getSymbol(9)->getAttribute("z"));;
+    robotGlobalPose.angle = str2float(worldModel->getSymbol(9)->getAttribute("angle"));;
+    
+    Robot2DPoint robotGoal;
+    robotGoal.x = robotGlobalPose.x;
+    robotGoal.z = robotGlobalPose.z;
+    robotGoal.angle = robotGlobalPose.angle + 3.14;
+    
+    std::cout << "robotGlobalPose: " << robotGlobalPose.x << " " << robotGlobalPose.z << " " << robotGlobalPose.angle << std::endl;
+    std::cout << "robotGoal: " << robotGoal.x << " " << robotGoal.z << " " << robotGoal.angle << std::endl;
+    
+    updateGoal(robotGoal);
+}
+
+void SpecificWorker::moveTrolleyBackwards()
+{
+    Robot2DPoint robotGoal;
+    robotGoal.x = str2float(worldModel->getSymbol(7)->getAttribute("x"));
+    robotGoal.z =  str2float(worldModel->getSymbol(7)->getAttribute("z"));
+    robotGoal.angle = str2float(worldModel->getSymbol(7)->getAttribute("angle"));
+    updateGoal(robotGoal);
+}
+
+void SpecificWorker::updateGoal(const Robot2DPoint& robotGoal)
+{
+    std::cout << "robotGoal: (x = " << robotGoal.x  <<  ",z = " << robotGoal.z << ", angle = " << robotGoal.angle  << ")" << std::endl;
+    //Ponemos el goal en el nodo navegación 
+    worldModel->getSymbol(5)->setAttribute("x", float2str(robotGoal.x));
+    worldModel->getSymbol(5)->setAttribute("z", float2str(robotGoal.z));
+    worldModel->getSymbol(5)->setAttribute("angle", float2str(robotGoal.angle));
+    worldModel->getSymbol(5)->setAttribute("move", "backwards");
+    /*try{
+        localnavigator_proxy->goBackWardsTo(robotGoal.x, robotGoal.z, robotGoal.angle);
+    }
+    catch(...){}
+    */
+    
+}
+
 void SpecificWorker::removeHasAndDeliverLinks(bool& modelModified)
 {
-     try
+    try
     {
         std::string goal = worldModel->getSymbol(5)->getAttribute("goal");
         if( goal == "pick1_a" || goal == "pick1_b")
@@ -189,14 +299,12 @@ void SpecificWorker::publishModelModification()
 		try
 		{
 			AGMMisc::publishModification(worldModel, agmexecutive_proxy, "pickUpAgent");
-            //std::cout << __FILE__ << " " << __LINE__ << std::endl;
-            if(startPickUpProcess)
-            {
-                pickUpProcess();
-                startPickUpProcess = false;
-              //  std::cout << __FILE__ << " " << __LINE__ << std::endl;
-            }
-            //if(flagStop) ...
+            std::cout << __FILE__ << " " << __LINE__ << std::endl;
+           // if(prev_pick_status ==  pickUpStatus::APPROACHING))
+            //{
+            //    prev_pick_status_tmp = pickUpStatus::FORKINGUP;
+           // }
+            prev_pick_status = prev_pick_status_tmp;
             finished = true;
 			
 		}
@@ -434,5 +542,31 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	}
 
 	return true;
+}
+
+
+// ----------------------------------------------------------
+// PARAMETERS:
+// poseRobot: X,Z,angle (radians) of the robot in global's coordinates
+// poseLocal: X,Z,angle (radians) of the target pose in robot's coordinates
+// RESULT:
+// A poseMIRA struct containing X,Z,angle (radians) of the target pose in global's coordinates
+// ----------------------------------------------------------
+Robot2DPoint SpecificWorker::calculaPoseGlobalMIRASA3IR(const Robot2DPoint& poseRobot, const Robot2DPoint& poseLocal)
+{
+	Robot2DPoint poseGlobal;
+
+	// Directly taken from:
+	// Transform_global = Transform_global_robot * Transform_local_target
+	// where a transform matrix is:
+	//	c(phi)	-s(phi)	Tx
+	//	s(phi)	c(phi)	Tz
+	//	0		0		1
+
+	poseGlobal.x = cos(poseRobot.angle)*poseLocal.x - sin(poseRobot.angle)*poseLocal.z + poseRobot.x;
+	poseGlobal.z = sin(poseRobot.angle)*poseLocal.x + cos(poseRobot.angle)*poseLocal.z + poseRobot.z;
+	poseGlobal.angle = atan2( cos(poseRobot.angle)*sin(poseLocal.angle) + sin(poseRobot.angle)*cos(poseLocal.angle), cos(poseRobot.angle)*cos(poseLocal.angle) - sin(poseRobot.angle)*sin(poseLocal.angle) );
+
+	return poseGlobal;
 }
 
