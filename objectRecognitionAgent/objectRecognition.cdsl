@@ -1,10 +1,10 @@
 import "AGMWorldModel.idsl";
-import "AprilBasedLocalization.idsl";
+import "TagBasedLocalization.idsl";
 Component objectRecognition
 {
 	Communications
 	{
-		implements AprilBasedLocalization;
+		implements TagBasedLocalization;
 	};
 	language Cpp;
 	options agmagent;

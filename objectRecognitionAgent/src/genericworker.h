@@ -27,7 +27,7 @@
 
 #include <CommonBehavior.h>
 
-#include <AprilBasedLocalization.h>
+#include <TagBasedLocalization.h>
 #include <agm.h>
 
 #define CHECK_PERIOD 5000
@@ -37,8 +37,8 @@ typedef map <string,::IceProxy::Ice::Object*> MapPrx;
 
 using namespace std;
 
+using namespace RoboCompTagBasedLocalization;
 using namespace RoboCompPlanning;
-using namespace RoboCompAprilBasedLocalization;
 using namespace RoboCompAGMExecutive;
 using namespace RoboCompAGMCommonBehavior;
 using namespace RoboCompAGMWorldModel;
@@ -79,7 +79,10 @@ public:
 	virtual int uptimeAgent() = 0;
 	virtual bool deactivateAgent() = 0;
 	virtual StateStruct getAgentState() = 0;
-	virtual void newAprilBasedPose(const float x, const float z, const float alpha) = 0;
+	virtual void deliverFinishedPoseInfo(const double &x, const double &z, const double &alpha) = 0;
+	virtual void newTagBasedPose(const float x, const float z, const float alpha) = 0;
+	virtual void pickUpPoseInfo(const double &x, const double &z, const double &alpha) = 0;
+	virtual void trolleyPoseInfo(const double &x, const double &z, const double &alpha, const TrolleyRectangle &lines) = 0;
 	virtual void structuralChange(const RoboCompAGMWorldModel::World &w) = 0;
 	virtual void edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modifications) = 0;
 	virtual void edgeUpdated(const RoboCompAGMWorldModel::Edge &modification) = 0;

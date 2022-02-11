@@ -25,7 +25,7 @@
 #include <innermodel/innermodel.h>
 #include <thread>
 #include <chrono>
-#include <limits>
+#include <limits> 
 
 const int PATH_NOT_FOUND_TIMEOUT = 10;
 const string GOAL_POSITIONS_FILE = "/home/robocomp/robocomp/components/sa3ir/etc/goals/goalPositions.txt";
@@ -63,10 +63,13 @@ public:
 	void symbolUpdated(const RoboCompAGMWorldModel::Node &modification);
 	void symbolsUpdated(const RoboCompAGMWorldModel::NodeSequence &modification);
 	void reportRobotBatteryLevel(const RobotBatteryLevel &batteryLevel);
+    void reportForkLiftState(const string &status);
+    void reportAPTSensor(const float distance);
+    void reportLimitSwitchState(const bool &state);
 	void modifyingNavigationEdge(bool& model_modified);
 
 private:
-	void sendGoalToMira(const float goalx, const float goalz,const float angle) const;
+	void sendGoalToMira(const float goalx, const float goalz,const float angle, bool moving_fordwards = true) const;
 	void localizeRobot() const;
 	void readGoalPosition(string label);
 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
@@ -83,6 +86,8 @@ private:
     float distanceToGoal(const std::string& label);
     void readGoalPosition();
     void setObjectDetectionPose2();
+    void forkUp();
+    void pickUpTrolley(bool& model_modified);
 
 public slots:
 	void compute(); 
@@ -93,6 +98,13 @@ private: //AGM attributes and methods
 	AGMModel::SPtr worldModel;
 	InnerModel *innerModel;
 	bool active;
+    enum ForkingStateT
+    {
+        IDLE,
+        FORKINGUP,
+        FORWKINDOWN,
+        FINISHED
+    } forkingState;
 	
 private: 
     QWaitCondition waitGotoResult;
@@ -102,7 +114,11 @@ private:
 	navigationState navigationCurrentState;
 	bool batteryLevelChanged;
 	bool goToDockStation;
+#ifdef MIRON_TOOLS
 	string batteryLevel;
+#else
+    int batteryPercentLevel;
+#endif
 	Pose2D goalPosition;
     std::string goal;
 	bool sendGoal;
@@ -111,6 +127,7 @@ private:
 	bool robotCharging;
     std::thread abortActionThread;
     std::map<std::string, Pose2D> goalPositions;
+    bool movingFordwards;
 	
 		
 };

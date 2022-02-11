@@ -1,5 +1,5 @@
 /*
- *    Copyright (C)2020 by YOUR NAME HERE
+ *    Copyright (C)2021 by YOUR NAME HERE
  *
  *    This file is part of RoboComp
  *
@@ -80,9 +80,12 @@ public:
 	virtual int uptimeAgent() = 0;
 	virtual bool deactivateAgent() = 0;
 	virtual StateStruct getAgentState() = 0;
-	virtual void reportRobotState(const float distanceToGoal, const float angToGoal, const int timeElapsed, const navigationState &state) = 0;
+	virtual void reportAPTSensor(const float distance) = 0;
 	virtual void reportRobotBatteryLevel(const RobotBatteryLevel &batteryLevel) = 0;
 	virtual void reportRobotPose(const float x, const float z, const float angle) = 0;
+	virtual void reportRobotState(const float distanceToGoal, const float angToGoal, const int timeElapsed, const navigationState &state) = 0;
+	virtual void reportLimitSwitchState(const bool &state) = 0;
+	virtual void reportForkLiftState(const string &status) = 0;
 	virtual void structuralChange(const RoboCompAGMWorldModel::World &w) = 0;
 	virtual void edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modifications) = 0;
 	virtual void edgeUpdated(const RoboCompAGMWorldModel::Edge &modification) = 0;

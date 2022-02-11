@@ -52,6 +52,8 @@
 #include "validEstimatedPosition.hpp"
 #include "doNothing.hpp"
 #include "moveToStart.hpp"
+#include "rotateRight.hpp"
+#include "rotateLeft.hpp"
 #include "moveToDeliverArea.hpp"
 #include "moveToDefaultDeliverArea.hpp"
 
@@ -113,8 +115,9 @@ private:
 	InnerModel *innerModel;
 	bool active;  
     ActionRes action_result;
-    const std::string BT_FILE = "./bin/use_case_extended_p2.xml";
-
+   // const std::string BT_FILE = "./bin/use_case_extended_p2.xml";
+    const std::string BT_FILE = "./bin/use_case_sacir_rot.xml";
+    
 private:   
 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
 	void sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel); 

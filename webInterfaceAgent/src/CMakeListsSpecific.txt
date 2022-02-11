@@ -11,7 +11,7 @@ SET ( HEADERS
   specificmonitor.h
 )
 
-SET ( SPECIFIC_LIBS -ljsoncpp -lcpprest -lboost_system -lcrypto )
+SET ( SPECIFIC_LIBS -lcpprest -lboost_system -lcrypto )
 
 set(CMAKE_CXX_STANDARD 11)
 

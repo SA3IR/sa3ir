@@ -16,13 +16,14 @@
 		<attribute key="imType" value="transform" />
 		<attribute key="imName" value="world" />
 		<attribute key="volume" value="0.8" />
-        	<attribute key="lastAction" value="" />
-        	<attribute key="trolleyFull" value="false" />
+        <attribute key="lastAction" value="" />
+        <attribute key="trolleyFull" value="false" />
 	</symbol>
 
 
 	<symbol id="4" type="battery" x="600" y="250">
-		<attribute key="level" value="high" />
+        <!--	<attribute key="level" value="high" />-->
+        <attribute key="level" value="100" />
 	</symbol>
 	
 
@@ -33,6 +34,8 @@
 		<attribute key="goal" value="" />
 		<attribute key="docking" value="false"/>
 		<attribute key="result" value="" />
+        <attribute key="angle_correction" value=""/> <!--Remove from here. It is just for testing purposes-->
+        <attribute key="move" value="forwards"/> <!--Remove from here. It is just for testing purposes-->
 	</symbol>
 
 	<symbol id="6" type="detecting" x="-330" y="800">
@@ -42,11 +45,18 @@
 
 	<symbol id="7" type="pickingUp" x="-330" y="800">
 		<attribute key="result" value="" />
+        <attribute key="action" value="" />
+        <attribute key="x" value="0" />
+		<attribute key="z" value="0" />
+		<attribute key="angle" value="0" />
 	</symbol>
 
 
 	<symbol id="8" type="delivering" x="-330" y="800">
 		<attribute key="result" value="" />
+        <attribute key="x" value="0" />
+		<attribute key="z" value="0" />
+		<attribute key="angle" value="0" />
 	</symbol>
 
 	<symbol id="9" type="position" x="-330" y="900">
@@ -54,6 +64,7 @@
 		<attribute key="y" value="0" />
 		<attribute key="z" value="0" />
 		<attribute key="angle" value="0" />
+        <attribute key="place" value="start_a" />
 	</symbol>
 
 

@@ -26,7 +26,7 @@ SET ( SOURCES
   commonbehaviorI.cpp
   genericworker.cpp
   agmcommonbehaviorI.cpp
-  aprilbasedlocalizationI.cpp
+  tagbasedlocalizationI.cpp
   agmexecutivetopicI.cpp
 )
 
@@ -34,7 +34,7 @@ SET ( SOURCES
 
 #ROBOCOMP
 ROBOCOMP_INITIALIZE( $ENV{ROBOCOMP}/ )
-ROBOCOMP_WRAP_ICE( CommonBehavior AprilBasedLocalization  AGMExecutive AGMWorldModel Planning AGMCommonBehavior )
+ROBOCOMP_WRAP_ICE( CommonBehavior TagBasedLocalization  AGMExecutive AGMWorldModel Planning AGMCommonBehavior )
 SET (EXECUTABLE_OUTPUT_PATH ${RC_COMPONENT_DEVEL_PATH}/bin)
 
 # Qt4

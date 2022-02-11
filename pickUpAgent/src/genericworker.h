@@ -1,5 +1,5 @@
 /*
- *    Copyright (C)2020 by YOUR NAME HERE
+ *    Copyright (C)2021 by YOUR NAME HERE
  *
  *    This file is part of RoboComp
  *
@@ -27,6 +27,8 @@
 
 #include <CommonBehavior.h>
 
+#include <Navigator.h>
+#include <MiraLaser.h>
 #include <agm.h>
 
 #define CHECK_PERIOD 5000
@@ -36,10 +38,12 @@ typedef map <string,::IceProxy::Ice::Object*> MapPrx;
 
 using namespace std;
 
-using namespace RoboCompPlanning;
-using namespace RoboCompAGMExecutive;
-using namespace RoboCompAGMCommonBehavior;
 using namespace RoboCompAGMWorldModel;
+using namespace RoboCompAGMExecutive;
+using namespace RoboCompPlanning;
+using namespace RoboCompMiraLaser;
+using namespace RoboCompNavigator;
+using namespace RoboCompAGMCommonBehavior;
 
 
 struct BehaviorParameters
@@ -67,6 +71,8 @@ public:
 	bool isActive() { return active; }
 
 
+	LocalNavigatorPrx localnavigator_proxy;
+	LaserReporterPrx laserreporter_proxy;
 	AGMExecutivePrx agmexecutive_proxy;
 
 	virtual bool reloadConfigAgent() = 0;

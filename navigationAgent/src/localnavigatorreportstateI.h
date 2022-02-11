@@ -1,5 +1,5 @@
 /*
- *    Copyright (C)2020 by YOUR NAME HERE
+ *    Copyright (C)2021 by YOUR NAME HERE
  *
  *    This file is part of RoboComp
  *
@@ -34,9 +34,12 @@ public:
 LocalNavigatorReportStateI(GenericWorker *_worker);
 	~LocalNavigatorReportStateI();
 
-	void reportRobotState(const float  distanceToGoal, const float  angToGoal, const int  timeElapsed,  navigationState  state, const Ice::Current&);
+	void reportAPTSensor(const float  distance, const Ice::Current&);
 	void reportRobotBatteryLevel(const RobotBatteryLevel  &batteryLevel, const Ice::Current&);
 	void reportRobotPose(const float  x, const float  z, const float  angle, const Ice::Current&);
+	void reportRobotState(const float  distanceToGoal, const float  angToGoal, const int  timeElapsed,  navigationState  state, const Ice::Current&);
+	void reportLimitSwitchState( bool  state, const Ice::Current&);
+	void reportForkLiftState(const string  &status, const Ice::Current&);
 
 private:
 

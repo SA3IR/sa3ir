@@ -246,32 +246,6 @@ bool SpecificWorker::hasLink(unsigned int source, unsigned int target, const std
     return result;
 }
 
-int SpecificWorker::readJsonFile()
-{
-    pickersActions.clear();
-    ifstream ifs("rest_result.json");
-	Json::Reader reader;
-	Json::Value root;
-	if(reader.parse(ifs, root)){
-		for(unsigned int i=0; i<root.size(); i++)
-		{
-			auto element = root[i];
-            std::string pickerID = element["pickerId"].asString();
-            std::string action = element["action"].asString();
-           // std::cout << "PickerID: " << pickerID << std::endl;
-			//std::cout << "Action: " << action << std::endl;
-            if(action != "")
-                pickersActions[pickerID] = action;
-		}
-	}
-    std::ofstream ofs ("rest_result.json", std::ofstream::out | std::ofstream::trunc); //TODO: something is wrong with the JSON file. Check it!
-    ofs.close();
-	return 0;
-}
-
-
-
-
 int SpecificWorker::httpGetRequest()
 {
     return httpRequest(methods::GET, "/api/pickers");
@@ -284,55 +258,113 @@ int SpecificWorker::httpPostRequest(const std::string& uri)
 
 int SpecificWorker::httpRequest(const method &mtd, const std::string& uri)
 {
-    auto fileStream = std::make_shared<concurrency::streams::ostream>();
-
-    // Open stream to output file.
-    pplx::task<void> requestTask = concurrency::streams::fstream::open_ostream(U("rest_result.json")).then([=](concurrency::streams::ostream outFile)
-    {
-        *fileStream = outFile;
-
-        // Create http_client to send the request.
-        http_client client(U("http://localhost:8080/"));//TODO: move IP to config file
-        //http_client client(U("http://192.168.0.126:8080/"));//TODO: move IP to config file
-
-        // Build request URI and start the request.
-        uri_builder builder(U(uri));
-        return client.request(mtd, builder.to_string());
-    })
-
-    // Handle response headers arriving.
-    .then([=](http_response response)
-    {
-        printf("Received response status code:%u\n", response.status_code());
-
-        // Write response body into the file.
-        return response.body().read_to_end(fileStream->streambuf());
-    })
-
-    // Close the file stream.
-    .then([=](size_t)
-    {
-       // std::cout << "closing fileStream" << std::endl;
-       // fileStream->seek(0); 
-        return fileStream->close();
-    });
-
-    // Wait for all the outstanding I/O to complete and handle any exceptions
-    try
-    {
-        requestTask.wait();
-    }
-    catch (const std::exception &e)
-    {
-        printf("Error exception:%s\n", e.what());
-        return 1;
-    }
     
-   
-    
+
+    // Create http_client to send the request.
+    http_client client(U("http://localhost:8080/"));//TODO: move IP to config file
+    //http_client client(U("http://192.168.0.126:8080/"));//TODO: move IP to config file
+
+     // Build request URI and start the request.
+    uri_builder builder(U(uri));
+    client.request(mtd, builder.to_string()).then([this](http_response response)
+        {
+            json = response.extract_json().get();
+        }
+    ).wait();
+       
     return 0;
 }
 
+
+int SpecificWorker::readJsonFile()
+{
+    try
+    {
+        pickersActions.clear();
+        
+        if (!json.is_null())
+        {
+            if(json.is_array())
+            {
+                // Loop over each element in the array
+                for (size_t index = 0; index < json.as_array().size(); ++index)
+                {
+                    const web::json::value &value = json.as_array().at(index);
+
+                    auto pickerID = value.at(U("pickerId")).as_string();
+                    auto action = value.at(U("action")).as_string();
+                    if(action != "")
+                        pickersActions[pickerID] = action;
+                }
+            }
+        }
+    }
+    catch (const std::exception& e)
+    {
+        std::cout << e.what() << std::endl;
+    }
+	
+    return 0;
+}
+
+/*
+std::string SpecificWorker::DisplayJSONValue(web::json::value v)
+{
+    std::stringstream ss;
+    try
+    {
+        if (!v.is_null())
+        {
+            if(v.is_object())
+            {
+                // Loop over each element in the object
+                for (auto iter = v.as_object().cbegin(); iter != v.as_object().cend(); ++iter)
+                {
+                    // It is necessary to make sure that you get the value as const reference
+                    // in order to avoid copying the whole JSON value recursively (too expensive for nested objects)
+                    const utility::string_t &str = iter->first;
+                    const web::json::value &value = iter->second;
+
+                    if (value.is_object() || value.is_array())
+                    {
+                        ss << "Parent: " << str << std::endl;
+
+                        ss << DisplayJSONValue(value);
+
+                        ss << "End of Parent: " << str << std::endl;
+                    }
+                    else
+                    {
+                        ss << "str: " << str << ", Value: " << value.serialize() << std::endl;
+                    }
+                }
+            }
+            else if(v.is_array())
+            {
+                // Loop over each element in the array
+                for (size_t index = 0; index < v.as_array().size(); ++index)
+                {
+                    const web::json::value &value = v.as_array().at(index);
+
+                    ss << "Array: " << index << std::endl;
+                    ss << DisplayJSONValue(value);
+                }
+            }
+            else
+            {
+                ss << "Value: " << v.serialize() << std::endl;
+            }
+        }
+    }
+    catch (const std::exception& e)
+    {
+        std::cout << e.what() << std::endl;
+        ss << "Value: " << v.serialize() << std::endl;
+    }
+
+    return ss.str();
+}
+*/
 
 bool SpecificWorker::updateAGM(const std::string& pickerID, const::string& action)
 {

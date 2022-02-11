@@ -110,13 +110,13 @@ void EstimateListener::dataAvailable(const RoqmeDDSTopics::RoqmeEstimate &data, 
 #ifdef ADAPTATION_LOGIC
     if ( name == "safety" )
     {
-        if(!flag_safety_ && value <= 0.50)
+        if(!flag_safety_ && value <= 0.55)
         {
             std::cout << "1.- Safety: " << value << ". Abortando mission" << std::endl;
             abortAction("deliver");
             flag_safety_ = true;
         }
-        else if (flag_safety_ && value > 0.50) 
+        else if (flag_safety_ && value > 0.55) 
         {
             std::cout << "2.- Safety: " << value << ". Abortando mission" << std::endl;
             abortAction("pick");
@@ -126,13 +126,13 @@ void EstimateListener::dataAvailable(const RoqmeDDSTopics::RoqmeEstimate &data, 
     } 
     else if ( name == "power_autonomy" )
 	{
-        if(!flag_variant_dock_ && value <= 0.4)
+        if(!flag_variant_dock_ && value <= 0.2)
 		{
             std::cout << "1.- Power autonomy: " << value << ". Abortando mission" << std::endl;
             abortAction("dock");
 			flag_variant_dock_ = true;	 
 		}
-		else if(flag_power_autonomy_ == true && value > 0.4)
+		else if(flag_power_autonomy_ == true && value > 0.2)
         {
             flag_variant_dock_ = false;
         }

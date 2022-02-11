@@ -31,7 +31,6 @@
 #include <cpprest/filestream.h>
 
 #include <fstream>
-#include <jsoncpp/json/json.h>
 
 using namespace utility;                    // Common utilities like string conversions
 using namespace web;                        // Common features like URIs.
@@ -76,8 +75,12 @@ private:
     bool publishModelModification();    
     int readJsonFile();
     int httpGetRequest();
+    
+    //std::string DisplayJSONValue(web::json::value v);
+    
     int httpPostRequest(const std::string& path);
     int httpRequest(const method &mtd, const std::string& uri);
+
     bool updateAGM(const std::string& pickerID, const::string& action);
     bool hasLink(unsigned int source, unsigned int target, const std::string& link);
     bool actionFailed(unsigned int nodeId);
@@ -91,6 +94,8 @@ private:
     std::vector<std::string> pickers_action;
     const std::string has_trolley = "has_trolley";
     const std::string deliver_trolley = "deliver_trolley";
+    
+    json::value json;
 };
 
 #endif

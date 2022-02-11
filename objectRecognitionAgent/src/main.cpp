@@ -82,10 +82,10 @@
 #include "commonbehaviorI.h"
 
 #include <agmcommonbehaviorI.h>
-#include <aprilbasedlocalizationI.h>
+#include <tagbasedlocalizationI.h>
 #include <agmexecutivetopicI.h>
 
-#include <AprilBasedLocalization.h>
+#include <TagBasedLocalization.h>
 
 
 // User includes here
@@ -210,15 +210,15 @@ int ::objectRecognition::run(int argc, char* argv[])
 
 
 		// Server adapter creation and publication
-		if (not GenericMonitor::configGetString(communicator(), prefix, "AprilBasedLocalization.Endpoints", tmp, ""))
+		if (not GenericMonitor::configGetString(communicator(), prefix, "TagBasedLocalization.Endpoints", tmp, ""))
 		{
-			cout << "[" << PROGRAM_NAME << "]: Can't read configuration for proxy AprilBasedLocalization";
+			cout << "[" << PROGRAM_NAME << "]: Can't read configuration for proxy TagBasedLocalization";
 		}
-		Ice::ObjectAdapterPtr adapterAprilBasedLocalization = communicator()->createObjectAdapterWithEndpoints("AprilBasedLocalization", tmp);
-		AprilBasedLocalizationI *aprilbasedlocalization = new AprilBasedLocalizationI(worker);
-		adapterAprilBasedLocalization->add(aprilbasedlocalization, Ice::stringToIdentity("aprilbasedlocalization"));
-		adapterAprilBasedLocalization->activate();
-		cout << "[" << PROGRAM_NAME << "]: AprilBasedLocalization adapter created in port " << tmp << endl;
+		Ice::ObjectAdapterPtr adapterTagBasedLocalization = communicator()->createObjectAdapterWithEndpoints("TagBasedLocalization", tmp);
+		TagBasedLocalizationI *tagbasedlocalization = new TagBasedLocalizationI(worker);
+		adapterTagBasedLocalization->add(tagbasedlocalization, Ice::stringToIdentity("tagbasedlocalization"));
+		adapterTagBasedLocalization->activate();
+		cout << "[" << PROGRAM_NAME << "]: TagBasedLocalization adapter created in port " << tmp << endl;
 
 
 
