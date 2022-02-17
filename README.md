@@ -2,9 +2,9 @@
 
 ## Requirements
 
-1. Install the BehaviorTree.CPP library from https://gitlab.com/aromerogarces/behaviortree.git
+1. Install the BehaviorTree.CPP library from https://github.com/BehaviorTree/BehaviorTree.CPP
 
-2. Install RealSense (https://github.com/IntelRealSense/librealsense/blob/master/doc/distribution_linux.md)
+2. Install librealsense from https://github.com/IntelRealSense/librealsense/blob/master/doc/distribution_linux.md
 
 3. Install OpenVino from https://github.com/openvinotoolkit/openvino
 
