@@ -13,7 +13,10 @@ killall -9 miron
 killall -9 python missionagent agmmission icebox rcnode 
 killall -9 zmq_dummy_server 
 killall -9 ZMQServer_client
+killall -9 fuzzyReasoner
 sleep 1
 #killall -9 java
+killall -9 chatbot
 killall -9 mira
+
 

@@ -51,6 +51,12 @@ rcremote localhost mironagent /home/robocomp/robocomp/components/sa3ir/mironAgen
 sleep 1;
 
 #
+# FuzzyReasoner
+#rcremote localhost fuzzyReasoner /home/robocomp/robocomp/components/sa3ir/fuzzyReasoner ./bin/fuzzyReasoner
+
+sleep 1
+
+#
 # Mission
 rcremote localhost mission /home/robocomp/AGM/tools/agmmission agmmission --Ice.Config=/home/robocomp/robocomp/components/sa3ir/etc/config/mission.conf
 
@@ -104,13 +110,23 @@ sleep 1;
 
 #
 # RealsenseAgent
-rcremote localhost realsense /home/robocomp/robocomp/components/sa3ir/realsenseComp ./bin/realsense /home/robocomp/robocomp/components/sa3ir/etc/config/realsenseAgent.conf
+#rcremote localhost realsense /home/robocomp/robocomp/components/sa3ir/realsenseComp ./bin/realsense /home/robocomp/robocomp/components/sa3ir/etc/config/realsenseAgent.conf
+
+#sleep 1;
+
+#
+# TrolleyDetector
+rcremote localhost trolley /home/robocomp/robocomp/components/sa3ir/trolleyDetectorComp ./bin/trolleyDetector /home/robocomp/robocomp/components/sa3ir/etc/config/trolleyDetectorComp.conf
 
 sleep 1;
-
 
 #
 # ContextProvider
 rcremote localhost contextProvider /home/robocomp/robocomp/components/sa3ir/contextProviderComp/bin ./contextProvider --Ice.Config=/home/robocomp/robocomp/components/sa3ir/etc/config/contextProvider.conf
 
+sleep 1;
+
+#
+# ChatbotAgent
+rcremote localhost chatbot /home/robocomp/robocomp/components/sa3ir/chatbotAgent/bin ./chatbot --Ice.Config=/home/robocomp/robocomp/components/sa3ir/etc/config/chatbot.conf
 

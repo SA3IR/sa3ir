@@ -22,8 +22,9 @@ SUBDIRS(
 	personAgent
 	ZMQServer
 	behaviorTreeAgent
-	mira/localNavigationComp
-	realsenseComp
+#	mira/localNavigationComp
+	trolleyDetectorComp
+#	fuzzyReasoner
 	webInterfaceAgent
 	mironAgent/
 )
