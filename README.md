@@ -16,7 +16,7 @@
 
 *cd* to $ROBOCOMP/components directory  and type:
 
-    git clone https://gitlab.com/grupo-avispa/sa3ir.git
+    git clone https://github.com/SA3IR/robocomp
 
 
 Let's compile the whole thing:
