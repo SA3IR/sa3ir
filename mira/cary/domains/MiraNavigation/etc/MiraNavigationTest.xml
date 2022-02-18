@@ -1,0 +1,25 @@
+<root>
+	<unit id="MiraNavigation" class="mira::MiraNavigation">
+		<PersonFollowMinDistance>1.0</PersonFollowMinDistance>
+		<PersonFollowMaxDistance>1.5</PersonFollowMaxDistance>
+		<PersonFollowOrientationTolerance>0.087</PersonFollowOrientationTolerance>
+		<ResetBumperInterval>1000</ResetBumperInterval>
+	</unit>
+
+	<link child="/robot/PersonFrame" parent="/robot/RobotFrame">
+		<X>0</X>
+		<Y>0</Y>
+		<Phi>0</Phi>
+	</link>
+
+	<parameter name="/navigation/Pilot.Planner.Objectives[?].item.Objective{mira::pilot::PathObjective}">
+		<UseFilteredValue>true</UseFilteredValue>
+	</parameter>
+	<parameter name="/navigation/Pilot">
+		<UseRecovery>true</UseRecovery>
+	</parameter>
+	<parameter name="/robot/Robot.Modules.MainControlUnit.Force">80</parameter>
+	<parameter name="/maps/cost/CostMapper.CostMaps[0].item.Mappers[0].item">
+		<MinObstacleDistance>0.2</MinObstacleDistance>
+	</parameter>
+</root>

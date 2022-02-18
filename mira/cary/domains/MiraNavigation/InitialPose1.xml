@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+  <InitialPose>
+    <!--The translational part of the transform-->
+    <X>0.0115305185318</X>
+    <!--The translational part of the transform-->
+    <Y>-0.00138247013092</Y>
+    <!--The orientation in degrees-->
+    <Phi>0.605757534504</Phi>
+    <!--The covariance matrix-->
+    <Cov>[  0.19765225052833557, 0.0015332251787185669,                     0;
+   0.00153321772813797,   0.19680216908454895,                     0;
+                     0,                     0,  0.099928103387355804]</Cov>
+  </InitialPose>
+  <Date>1636638388009090000</Date>
+</root>

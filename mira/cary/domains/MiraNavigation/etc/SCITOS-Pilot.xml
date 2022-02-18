@@ -1,0 +1,165 @@
+<root>
+	<communication>
+		<Port>1234</Port>
+	</communication>
+
+	<!-- set to false if you do not load maps on the robot (e.g. when maps are published by a server) -->
+	<var useMap="true"/>
+	<var topoMap="none"/>
+	<var pilotConfig="${findpkg Pilot}/etc/Pilot.xml"/>
+<!--	<var pathPlanner="PathDirectionPlanner"/>-->
+
+	<if useMap="true">
+		<var mapConfigFile="${findpkg SCITOSConfigs}/etc/DefaultMapConfig.xml"/>
+		<include file="${mapConfigFile}"/>
+		<var costMapperConfigFile="${findpkg SCITOSConfigs}/etc/DefaultCostMapperConfig.xml"/>
+		<include file="${costMapperConfigFile}"/>
+	</if>
+
+	<include file="${findpkg SCITOS}/etc/SCITOSDriver.xml"/>
+
+	<namespace name="robot">
+		<namespace name="frontLaser">
+			<include file="${findpkg RangeFinder}/etc/RangeFinder-${frontLaser}.xml"/>
+			<parameter name="RangeFinder.RangeFinder">
+				<Device>
+					<Device>${frontLaserDevice}</Device>
+				</Device>
+				<if_exists file="${frontLaserIgnoreIntervals}">
+					<include file="${frontLaserIgnoreIntervals}"/>
+				</if_exists>
+			</parameter>
+		</namespace>
+	</namespace>
+
+
+	<var localization="Poseidon" />
+	<include file="${findpkg SCITOSConfigs}/etc/${localization}Localization.xml"/>
+	
+	<namespace name="localization">
+		<using name="../robot/Odometry" />
+		<using name="../robot/OdometryFrame" />
+		<using name="../robot/RobotFrame" />
+
+		<using name="../maps/static/Map" />
+		<using name="../maps/MapFrame" />
+		
+		<parameter name="Poseidon">
+			<Persistence class="mira::localization::PersistentPose">
+				<PersistentFolder>.</PersistentFolder>
+				<BaseFileName>InitialPose</BaseFileName>
+				<StorageInterval>500</StorageInterval>
+			</Persistence>
+		</parameter>
+	</namespace>
+
+	<namespace name="navigation">
+		<namespace name="laser">
+			<using name="../../robot/OdometryFrame" as="MapFrame"/>
+			<using name="../../robot/Odometry" />
+			<using name="../../robot/RobotFrame"/>
+			<unit id="GridMapperLaser" class="mira::mapping::OccupancyGridMapperWithShape">
+				<!--The interval of the watchdog-->
+				<HeartbeatInterval>1000</HeartbeatInterval>
+				<!--The interval for trying to recover-->
+				<RecoverInterval>1000</RecoverInterval>
+				<!--The cell size of the created occupancy grid in m (default=0.05)-->
+				<CellSize>0.02</CellSize>
+				<!--The minimum certainty a range scan must have to be included into the map-->
+				<MinCertainty>5</MinCertainty>
+				<!--Scans are cropped at this maximum range-->
+				<MaxRange>2</MaxRange>
+				<!--The local cropping radius for mapping. If the specified local radius is >0, then the map is cropped to an area with the specified local radius
+				(note that it may grow beyond the crop radius around the current position due to higher map update range)-->
+				<LocalCropRadius>2</LocalCropRadius>
+				<!--The sigma for distance reliability function (if 0 sigma is not used)-->
+				<SensorReliabilitySigma>2</SensorReliabilitySigma>
+				<!--The minimum occupancy estimated for current observation-->
+				<MinEstimationOccupancyLimit>72</MinEstimationOccupancyLimit>
+				<!--The maximum occupancy estimated for current observation-->
+				<MaxEstimationOccupancyLimit>250</MaxEstimationOccupancyLimit>
+				<!--The minimum occupancy in the map-->
+				<MinOccupancyLimit>34</MinOccupancyLimit>
+				<!--The maximum occupancy in the map-->
+				<MaxOccupancyLimit>220</MaxOccupancyLimit>
+				<!--Forget rate [0,1] for the occupancy values in the cells which is applied after the map was published. default: 0 = no forgetting-->
+				<DecayRate>0.1</DecayRate>
+				<!--The name of the service that provides a rigid model for clearing the shape of the model in the map
+				(if empty, an arbitrary IRigidModelProvider service will be searched)-->
+				<ModelProvider>../../robot/Robot</ModelProvider>
+				<!--The name of the sensor channels-->
+				<Sensors>
+					<item>../../robot/frontLaser/Laser</item>
+				</Sensors>
+			</unit>
+		</namespace>
+
+		<unit id="GridMapMerger" class="mira::mapping::OccupancyGridMerger">
+			<!--The interval of the watchdog-->
+			<HeartbeatInterval>1000</HeartbeatInterval>
+			<!--The interval for trying to recover-->
+			<RecoverInterval>1000</RecoverInterval>
+			<!--The cycle time of our process-->
+			<CycleTime>100</CycleTime>
+			<!--The maximum time about that we can exceed the cycle time before issuing a warning-->
+			<CycleTimeTolerance>100</CycleTimeTolerance>
+			<!--The vector of required map names.-->
+			<RequiredMaps>
+			  <item>laser/Map</item>
+			</RequiredMaps>
+			<!--The vector of optional map names.-->
+			<OptionalMaps />
+			<!--Maximum age of required and optional maps-->
+			<MaxMapAge>1000</MaxMapAge>
+		</unit>
+
+		<using name="laser/Map" as="PlannerObstacleMap"/>
+		<using name="MergedMap" as="LocalMap"/>
+
+		<using name="../robot/Odometry"/>
+		<using name="../robot/OdometryFrame" />
+		<using name="../robot/RobotFrame" />
+		<using name="../robot/RobotFrame" as="PlugFrame"/>
+		<using name="../robot/Mileage"/>
+
+		<using name="../maps/static/Map" as="GlobalMap"/>
+		<using name="../maps/nogo/Map" as="NogoMap"/>
+		<using name="../maps/speed/Map" as="SpeedMap"/>
+
+		<using name="../maps/cost/PlannerMap_FinalInitMap" as="InitCostMap" />
+		<using name="../maps/cost/PlannerMap_FinalCostMap" as="CurrentCostMap" />
+		<using name="../maps/cost/CostMapper" />
+
+		<include file="${pilotConfig}"/>
+		<parameter name="Pilot">
+			<DriveService>../robot/Robot</DriveService>
+			<ModelProvider>../robot/Robot</ModelProvider>
+		</parameter>
+		<if safetyZone="true">
+			<parameter name="Pilot.Planner.Objectives[?].item.Objective{mira::pilot::DistanceObjective}">
+				<MaxSafetyZoneTransVelocity>${maxSafetyZoneVelocity}</MaxSafetyZoneTransVelocity>
+			</parameter>
+		</if>
+		<parameter name="Pilot.Planner.Objectives[+end]">
+			<item>
+				<Objective class="mira::pilot::NogoObjective"/>
+				<!--If true, the objective is disabled-->
+				<Disabled>false</Disabled>
+				<!--The weight for this objective-->
+				<Weight>1.0</Weight>
+			</item>
+		</parameter>
+		<!--<parameter name="Pilot.Planner.Objectives[+end]">
+			<item>
+				<Objective class="mira::pilot::PersonFollowObjective">
+					<HypothesesChannel>/robot/PersonFrame</HypothesesChannel>
+				</Objective>
+-->
+				<!--If true, the objective is disabled-->
+	<!--			<Disabled>false</Disabled> -->
+				<!--The weight for this objective--> 
+<!--				<Weight>1.0</Weight>
+			</item>
+		</parameter>-->
+	</namespace>
+</root>
